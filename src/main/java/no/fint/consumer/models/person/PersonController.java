@@ -82,7 +82,7 @@ public class PersonController {
     public ResponseEntity getPersonByFodselsnummer(@PathVariable String id,
             @RequestHeader(HeaderConstants.ORG_ID) String orgId,
             @RequestHeader(HeaderConstants.CLIENT) String client) {
-        log.info("Fodselsnummer: {}, OrgId: {}, Client: {}", id, orgId, client);
+        log.info("Fodselsnummer: {}xxx, OrgId: {}, Client: {}", id.substring(0,8), orgId, client);
 
         Event event = new Event(orgId, Constants.COMPONENT, FellesActions.GET_PERSON, client);
         fintAuditService.audit(event);
