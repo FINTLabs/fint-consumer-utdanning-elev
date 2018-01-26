@@ -54,6 +54,7 @@ public class MedlemskapController {
         cacheService.rebuildCache(orgId);
     }
 
+    /*
     @GetMapping
     public ResponseEntity getMedlemskap(@RequestHeader(HeaderConstants.ORG_ID) String orgId,
             @RequestHeader(HeaderConstants.CLIENT) String client,
@@ -76,7 +77,7 @@ public class MedlemskapController {
 
         return assembler.resources(medlemskap);
     }
-
+    */
 
     @GetMapping("/systemid/{id}")
     public ResponseEntity getMedlemskapBySystemId(@PathVariable String id,
