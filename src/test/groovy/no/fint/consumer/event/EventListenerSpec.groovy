@@ -1,4 +1,4 @@
-package no.fint.consumer.service
+package no.fint.consumer.event
 
 import no.fint.consumer.event.EventListener
 import no.fint.event.model.Event
