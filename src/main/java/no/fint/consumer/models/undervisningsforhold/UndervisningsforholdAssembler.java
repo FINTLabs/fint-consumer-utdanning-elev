@@ -16,8 +16,9 @@ public class UndervisningsforholdAssembler extends FintResourceAssembler<Undervi
 
     @Override
     public FintResourceSupport assemble(Undervisningsforhold undervisningsforhold , FintResource<Undervisningsforhold> fintResource) {
-        return createResourceWithId(undervisningsforhold.getSystemId().getIdentifikatorverdi(), fintResource, "systemId");
+        return createResourceWithId(undervisningsforhold.getSystemId().getIdentifikatorverdi(), fintResource, "systemid");
     }
+    
     
     
 }

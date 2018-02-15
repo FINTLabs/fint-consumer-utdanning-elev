@@ -16,8 +16,9 @@ public class BasisgruppeAssembler extends FintResourceAssembler<Basisgruppe> {
 
     @Override
     public FintResourceSupport assemble(Basisgruppe basisgruppe , FintResource<Basisgruppe> fintResource) {
-        return createResourceWithId(basisgruppe.getSystemId().getIdentifikatorverdi(), fintResource, "systemId");
+        return createResourceWithId(basisgruppe.getSystemId().getIdentifikatorverdi(), fintResource, "systemid");
     }
+    
     
     
 }

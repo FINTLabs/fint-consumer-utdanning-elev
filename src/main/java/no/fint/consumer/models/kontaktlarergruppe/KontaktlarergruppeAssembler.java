@@ -16,8 +16,9 @@ public class KontaktlarergruppeAssembler extends FintResourceAssembler<Kontaktla
 
     @Override
     public FintResourceSupport assemble(Kontaktlarergruppe kontaktlarergruppe , FintResource<Kontaktlarergruppe> fintResource) {
-        return createResourceWithId(kontaktlarergruppe.getSystemId().getIdentifikatorverdi(), fintResource, "systemId");
+        return createResourceWithId(kontaktlarergruppe.getSystemId().getIdentifikatorverdi(), fintResource, "systemid");
     }
+    
     
     
 }

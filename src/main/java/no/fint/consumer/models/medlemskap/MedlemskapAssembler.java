@@ -16,8 +16,9 @@ public class MedlemskapAssembler extends FintResourceAssembler<Medlemskap> {
 
     @Override
     public FintResourceSupport assemble(Medlemskap medlemskap , FintResource<Medlemskap> fintResource) {
-        return createResourceWithId(medlemskap.getSystemId().getIdentifikatorverdi(), fintResource, "systemId");
+        return createResourceWithId(medlemskap.getSystemId().getIdentifikatorverdi(), fintResource, "systemid");
     }
+    
     
     
 }

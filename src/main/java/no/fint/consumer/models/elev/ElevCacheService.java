@@ -60,21 +60,33 @@ public class ElevCacheService extends CacheService<FintResource<Elev>> {
 
 
     public Optional<FintResource<Elev>> getElevByBrukernavn(String orgId, String brukernavn) {
-        Identifikator needle = new Identifikator();
-        needle.setIdentifikatorverdi(brukernavn);
-        return getOne(orgId, (fintResource) -> needle.equals(fintResource.getResource().getBrukernavn()));
+        return getOne(orgId, (fintResource) -> Optional
+                .ofNullable(fintResource)
+                .map(FintResource::getResource)
+                .map(Elev::getBrukernavn)
+                .map(Identifikator::getIdentifikatorverdi)
+                .map(id -> id.equals(brukernavn))
+                .orElse(false));
     }
 
     public Optional<FintResource<Elev>> getElevByElevnummer(String orgId, String elevnummer) {
-        Identifikator needle = new Identifikator();
-        needle.setIdentifikatorverdi(elevnummer);
-        return getOne(orgId, (fintResource) -> needle.equals(fintResource.getResource().getElevnummer()));
+        return getOne(orgId, (fintResource) -> Optional
+                .ofNullable(fintResource)
+                .map(FintResource::getResource)
+                .map(Elev::getElevnummer)
+                .map(Identifikator::getIdentifikatorverdi)
+                .map(id -> id.equals(elevnummer))
+                .orElse(false));
     }
 
     public Optional<FintResource<Elev>> getElevBySystemId(String orgId, String systemId) {
-        Identifikator needle = new Identifikator();
-        needle.setIdentifikatorverdi(systemId);
-        return getOne(orgId, (fintResource) -> needle.equals(fintResource.getResource().getSystemId()));
+        return getOne(orgId, (fintResource) -> Optional
+                .ofNullable(fintResource)
+                .map(FintResource::getResource)
+                .map(Elev::getSystemId)
+                .map(Identifikator::getIdentifikatorverdi)
+                .map(id -> id.equals(systemId))
+                .orElse(false));
     }
 
 

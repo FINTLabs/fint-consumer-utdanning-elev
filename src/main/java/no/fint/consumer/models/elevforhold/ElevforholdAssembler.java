@@ -16,8 +16,9 @@ public class ElevforholdAssembler extends FintResourceAssembler<Elevforhold> {
 
     @Override
     public FintResourceSupport assemble(Elevforhold elevforhold , FintResource<Elevforhold> fintResource) {
-        return createResourceWithId(elevforhold.getSystemId().getIdentifikatorverdi(), fintResource, "systemId");
+        return createResourceWithId(elevforhold.getSystemId().getIdentifikatorverdi(), fintResource, "systemid");
     }
+    
     
     
 }

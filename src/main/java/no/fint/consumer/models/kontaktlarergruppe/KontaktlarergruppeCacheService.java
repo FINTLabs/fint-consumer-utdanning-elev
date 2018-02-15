@@ -60,9 +60,13 @@ public class KontaktlarergruppeCacheService extends CacheService<FintResource<Ko
 
 
     public Optional<FintResource<Kontaktlarergruppe>> getKontaktlarergruppeBySystemId(String orgId, String systemId) {
-        Identifikator needle = new Identifikator();
-        needle.setIdentifikatorverdi(systemId);
-        return getOne(orgId, (fintResource) -> needle.equals(fintResource.getResource().getSystemId()));
+        return getOne(orgId, (fintResource) -> Optional
+                .ofNullable(fintResource)
+                .map(FintResource::getResource)
+                .map(Kontaktlarergruppe::getSystemId)
+                .map(Identifikator::getIdentifikatorverdi)
+                .map(id -> id.equals(systemId))
+                .orElse(false));
     }
 
 

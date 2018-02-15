@@ -60,9 +60,13 @@ public class MedlemskapCacheService extends CacheService<FintResource<Medlemskap
 
 
     public Optional<FintResource<Medlemskap>> getMedlemskapBySystemId(String orgId, String systemId) {
-        Identifikator needle = new Identifikator();
-        needle.setIdentifikatorverdi(systemId);
-        return getOne(orgId, (fintResource) -> needle.equals(fintResource.getResource().getSystemId()));
+        return getOne(orgId, (fintResource) -> Optional
+                .ofNullable(fintResource)
+                .map(FintResource::getResource)
+                .map(Medlemskap::getSystemId)
+                .map(Identifikator::getIdentifikatorverdi)
+                .map(id -> id.equals(systemId))
+                .orElse(false));
     }
 
 

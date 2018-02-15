@@ -60,9 +60,13 @@ public class UndervisningsforholdCacheService extends CacheService<FintResource<
 
 
     public Optional<FintResource<Undervisningsforhold>> getUndervisningsforholdBySystemId(String orgId, String systemId) {
-        Identifikator needle = new Identifikator();
-        needle.setIdentifikatorverdi(systemId);
-        return getOne(orgId, (fintResource) -> needle.equals(fintResource.getResource().getSystemId()));
+        return getOne(orgId, (fintResource) -> Optional
+                .ofNullable(fintResource)
+                .map(FintResource::getResource)
+                .map(Undervisningsforhold::getSystemId)
+                .map(Identifikator::getIdentifikatorverdi)
+                .map(id -> id.equals(systemId))
+                .orElse(false));
     }
 
 
