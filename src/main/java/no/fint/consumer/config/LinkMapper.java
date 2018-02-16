@@ -8,6 +8,8 @@ import no.fint.model.felles.kodeverk.iso.Kjonn;
 import no.fint.model.felles.kodeverk.iso.Landkode;
 import no.fint.model.felles.kodeverk.iso.Sprak;
 import no.fint.model.utdanning.elev.*;
+import no.fint.model.utdanning.kodeverk.Elevkategori;
+import no.fint.model.utdanning.kodeverk.Fravarstype;
 import no.fint.model.utdanning.timeplan.Fag;
 import no.fint.model.utdanning.timeplan.Rom;
 import no.fint.model.utdanning.timeplan.Time;
@@ -33,6 +35,8 @@ public class LinkMapper {
             .put(Rom.class.getName(), "/utdanning/timeplan/rom")
             .put(Time.class.getName(), "/utdanning/timeplan/time")
             .put(Undervisningsgruppe.class.getName(), "/utdanning/timeplan/undervisningsgruppe")
+            .put(Elevkategori.class.getName(), "/utdanning/kodeverk/elevkategori")
+            .put(Fravarstype.class.getName(), "/utdanning/kodeverk/fravarstype")
 			.build();
 	}
 
