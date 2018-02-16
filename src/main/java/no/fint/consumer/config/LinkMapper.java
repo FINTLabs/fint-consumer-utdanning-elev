@@ -10,10 +10,18 @@ import no.fint.model.felles.kodeverk.iso.Sprak;
 import no.fint.model.utdanning.elev.*;
 import no.fint.model.utdanning.kodeverk.Elevkategori;
 import no.fint.model.utdanning.kodeverk.Fravarstype;
+import no.fint.model.utdanning.kodeverk.Karakterskala;
+import no.fint.model.utdanning.kodeverk.Skoleeiertype;
 import no.fint.model.utdanning.timeplan.Fag;
 import no.fint.model.utdanning.timeplan.Rom;
 import no.fint.model.utdanning.timeplan.Time;
 import no.fint.model.utdanning.timeplan.Undervisningsgruppe;
+import no.fint.model.utdanning.utdanningsprogram.Arstrinn;
+import no.fint.model.utdanning.utdanningsprogram.Programomrade;
+import no.fint.model.utdanning.utdanningsprogram.Skole;
+import no.fint.model.utdanning.utdanningsprogram.Utdanningsprogram;
+import no.fint.model.utdanning.vurdering.Eksamensgruppe;
+import no.fint.model.utdanning.vurdering.Karakterverdi;
 
 public class LinkMapper {
 
@@ -37,6 +45,14 @@ public class LinkMapper {
             .put(Undervisningsgruppe.class.getName(), "/utdanning/timeplan/undervisningsgruppe")
             .put(Elevkategori.class.getName(), "/utdanning/kodeverk/elevkategori")
             .put(Fravarstype.class.getName(), "/utdanning/kodeverk/fravarstype")
+            .put(Karakterskala.class.getName(), "/utdanning/kodeverk/karakterskala")
+            .put(Skoleeiertype.class.getName(), "/utdanning/kodeverk/skoleeiertype")
+            .put(Arstrinn.class.getName(), "/utdanning/utdanningsprogram/arstrinn")
+            .put(Programomrade.class.getName(), "/utdanning/utdanningsprogram/programomrade")
+            .put(Skole.class.getName(), "/utdanning/utdanningsprogram/skole")
+            .put(Utdanningsprogram.class.getName(), "/utdanning/utdanningsprogram/utdanningsprogram")
+            .put(Eksamensgruppe.class.getName(), "/utdanning/vurdering/eksamensgruppe")
+            .put(Karakterverdi.class.getName(), "/utdanning/vurdering/karakterverdi")
 			.build();
 	}
 
