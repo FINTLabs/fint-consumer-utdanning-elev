@@ -79,6 +79,16 @@ public class ElevCacheService extends CacheService<FintResource<Elev>> {
                 .orElse(false));
     }
 
+    public Optional<FintResource<Elev>> getElevByFeidenavn(String orgId, String feidenavn) {
+        return getOne(orgId, (fintResource) -> Optional
+                .ofNullable(fintResource)
+                .map(FintResource::getResource)
+                .map(Elev::getFeidenavn)
+                .map(Identifikator::getIdentifikatorverdi)
+                .map(id -> id.equals(feidenavn))
+                .orElse(false));
+    }
+
     public Optional<FintResource<Elev>> getElevBySystemId(String orgId, String systemId) {
         return getOne(orgId, (fintResource) -> Optional
                 .ofNullable(fintResource)

@@ -1,4 +1,4 @@
-package no.fint.consumer.models.person;
+package no.fint.consumer.models.skoleressurs;
 
 import com.google.common.collect.ImmutableMap;
 import lombok.extern.slf4j.Slf4j;
@@ -21,23 +21,23 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import no.fint.model.felles.Person;
-import no.fint.model.felles.FellesActions;
+import no.fint.model.utdanning.elev.Skoleressurs;
+import no.fint.model.utdanning.elev.ElevActions;
 
 @Slf4j
 @CrossOrigin
 @RestController
-@RequestMapping(value = RestEndpoints.PERSON, produces = {FintRelationsMediaType.APPLICATION_HAL_JSON_VALUE, MediaType.APPLICATION_JSON_UTF8_VALUE})
-public class PersonController {
+@RequestMapping(value = RestEndpoints.SKOLERESSURS, produces = {FintRelationsMediaType.APPLICATION_HAL_JSON_VALUE, MediaType.APPLICATION_JSON_UTF8_VALUE})
+public class SkoleressursController {
 
     @Autowired
-    private PersonCacheService cacheService;
+    private SkoleressursCacheService cacheService;
 
     @Autowired
     private FintAuditService fintAuditService;
 
     @Autowired
-    private PersonAssembler assembler;
+    private SkoleressursAssembler assembler;
 
     @Autowired
     private ConsumerProps props;
@@ -68,7 +68,7 @@ public class PersonController {
     }
 
     @GetMapping
-    public ResponseEntity getPerson(
+    public ResponseEntity getSkoleressurs(
             @RequestHeader(name = HeaderConstants.ORG_ID, required = false) String orgId,
             @RequestHeader(name = HeaderConstants.CLIENT, required = false) String client,
             @RequestParam(required = false) Long sinceTimeStamp) {
@@ -80,26 +80,26 @@ public class PersonController {
         }
         log.info("OrgId: {}, Client: {}", orgId, client);
 
-        Event event = new Event(orgId, Constants.COMPONENT, FellesActions.GET_ALL_PERSON, client);
+        Event event = new Event(orgId, Constants.COMPONENT, ElevActions.GET_ALL_SKOLERESSURS, client);
         fintAuditService.audit(event);
 
         fintAuditService.audit(event, Status.CACHE);
 
-        List<FintResource<Person>> person;
+        List<FintResource<Skoleressurs>> skoleressurs;
         if (sinceTimeStamp == null) {
-            person = cacheService.getAll(orgId);
+            skoleressurs = cacheService.getAll(orgId);
         } else {
-            person = cacheService.getAll(orgId, sinceTimeStamp);
+            skoleressurs = cacheService.getAll(orgId, sinceTimeStamp);
         }
 
         fintAuditService.audit(event, Status.CACHE_RESPONSE, Status.SENT_TO_CLIENT);
 
-        return assembler.resources(person);
+        return assembler.resources(skoleressurs);
     }
 
 
-    @GetMapping("/fodselsnummer/{id}")
-    public ResponseEntity getPersonByFodselsnummer(@PathVariable String id,
+    @GetMapping("/feidenavn/{id}")
+    public ResponseEntity getSkoleressursByFeidenavn(@PathVariable String id,
             @RequestHeader(name = HeaderConstants.ORG_ID, required = false) String orgId,
             @RequestHeader(name = HeaderConstants.CLIENT, required = false) String client) {
         if (props.isOverrideOrgId() || orgId == null) {
@@ -108,19 +108,47 @@ public class PersonController {
         if (client == null) {
             client = props.getDefaultClient();
         }
-        log.info("Fodselsnummer: {}, OrgId: {}, Client: {}", id, orgId, client);
+        log.info("Feidenavn: {}, OrgId: {}, Client: {}", id, orgId, client);
 
-        Event event = new Event(orgId, Constants.COMPONENT, FellesActions.GET_PERSON, client);
+        Event event = new Event(orgId, Constants.COMPONENT, ElevActions.GET_SKOLERESSURS, client);
         fintAuditService.audit(event);
 
         fintAuditService.audit(event, Status.CACHE);
 
-        Optional<FintResource<Person>> person = cacheService.getPersonByFodselsnummer(orgId, id);
+        Optional<FintResource<Skoleressurs>> skoleressurs = cacheService.getSkoleressursByFeidenavn(orgId, id);
 
         fintAuditService.audit(event, Status.CACHE_RESPONSE, Status.SENT_TO_CLIENT);
 
-        if (person.isPresent()) {
-            return assembler.resource(person.get());
+        if (skoleressurs.isPresent()) {
+            return assembler.resource(skoleressurs.get());
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @GetMapping("/systemid/{id}")
+    public ResponseEntity getSkoleressursBySystemId(@PathVariable String id,
+            @RequestHeader(name = HeaderConstants.ORG_ID, required = false) String orgId,
+            @RequestHeader(name = HeaderConstants.CLIENT, required = false) String client) {
+        if (props.isOverrideOrgId() || orgId == null) {
+            orgId = props.getDefaultOrgId();
+        }
+        if (client == null) {
+            client = props.getDefaultClient();
+        }
+        log.info("SystemId: {}, OrgId: {}, Client: {}", id, orgId, client);
+
+        Event event = new Event(orgId, Constants.COMPONENT, ElevActions.GET_SKOLERESSURS, client);
+        fintAuditService.audit(event);
+
+        fintAuditService.audit(event, Status.CACHE);
+
+        Optional<FintResource<Skoleressurs>> skoleressurs = cacheService.getSkoleressursBySystemId(orgId, id);
+
+        fintAuditService.audit(event, Status.CACHE_RESPONSE, Status.SENT_TO_CLIENT);
+
+        if (skoleressurs.isPresent()) {
+            return assembler.resource(skoleressurs.get());
         } else {
             return ResponseEntity.notFound().build();
         }

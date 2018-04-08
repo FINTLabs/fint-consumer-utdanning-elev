@@ -154,6 +154,34 @@ public class ElevController {
         }
     }
 
+    @GetMapping("/feidenavn/{id}")
+    public ResponseEntity getElevByFeidenavn(@PathVariable String id,
+            @RequestHeader(name = HeaderConstants.ORG_ID, required = false) String orgId,
+            @RequestHeader(name = HeaderConstants.CLIENT, required = false) String client) {
+        if (props.isOverrideOrgId() || orgId == null) {
+            orgId = props.getDefaultOrgId();
+        }
+        if (client == null) {
+            client = props.getDefaultClient();
+        }
+        log.info("Feidenavn: {}, OrgId: {}, Client: {}", id, orgId, client);
+
+        Event event = new Event(orgId, Constants.COMPONENT, ElevActions.GET_ELEV, client);
+        fintAuditService.audit(event);
+
+        fintAuditService.audit(event, Status.CACHE);
+
+        Optional<FintResource<Elev>> elev = cacheService.getElevByFeidenavn(orgId, id);
+
+        fintAuditService.audit(event, Status.CACHE_RESPONSE, Status.SENT_TO_CLIENT);
+
+        if (elev.isPresent()) {
+            return assembler.resource(elev.get());
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
     @GetMapping("/systemid/{id}")
     public ResponseEntity getElevBySystemId(@PathVariable String id,
             @RequestHeader(name = HeaderConstants.ORG_ID, required = false) String orgId,
