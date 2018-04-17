@@ -1,15 +1,21 @@
 package no.fint.consumer.models.undervisningsforhold;
 
-import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+
 import lombok.extern.slf4j.Slf4j;
+
 import no.fint.cache.CacheService;
 import no.fint.consumer.config.Constants;
 import no.fint.consumer.config.ConsumerProps;
 import no.fint.consumer.event.ConsumerEventUtil;
 import no.fint.event.model.Event;
-import no.fint.model.relation.FintResource;
 import no.fint.model.felles.kompleksedatatyper.Identifikator;
+import no.fint.relations.FintResourceCompatibility;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -19,13 +25,20 @@ import java.util.List;
 import java.util.Optional;
 
 import no.fint.model.utdanning.elev.Undervisningsforhold;
+import no.fint.model.resource.utdanning.elev.UndervisningsforholdResource;
 import no.fint.model.utdanning.elev.ElevActions;
 
 @Slf4j
 @Service
-public class UndervisningsforholdCacheService extends CacheService<FintResource<Undervisningsforhold>> {
+public class UndervisningsforholdCacheService extends CacheService<UndervisningsforholdResource> {
 
     public static final String MODEL = Undervisningsforhold.class.getSimpleName().toLowerCase();
+
+    @Value("${fint.consumer.compatibility.fintresource:true}")
+    private boolean checkFintResourceCompatibility;
+
+    @Autowired
+    private FintResourceCompatibility fintResourceCompatibility;
 
     @Autowired
     private ConsumerEventUtil consumerEventUtil;
@@ -33,8 +46,18 @@ public class UndervisningsforholdCacheService extends CacheService<FintResource<
     @Autowired
     private ConsumerProps props;
 
+    @Autowired
+    private UndervisningsforholdLinker linker;
+
+    private JavaType javaType;
+
+    private ObjectMapper objectMapper;
+
     public UndervisningsforholdCacheService() {
         super(MODEL, ElevActions.GET_ALL_UNDERVISNINGSFORHOLD);
+        objectMapper = new ObjectMapper();
+        javaType = objectMapper.getTypeFactory().constructCollectionType(List.class, UndervisningsforholdResource.class);
+        objectMapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
     }
 
     @PostConstruct
@@ -59,20 +82,27 @@ public class UndervisningsforholdCacheService extends CacheService<FintResource<
     }
 
 
-    public Optional<FintResource<Undervisningsforhold>> getUndervisningsforholdBySystemId(String orgId, String systemId) {
-        return getOne(orgId, (fintResource) -> Optional
-                .ofNullable(fintResource)
-                .map(FintResource::getResource)
-                .map(Undervisningsforhold::getSystemId)
+    public Optional<UndervisningsforholdResource> getUndervisningsforholdBySystemId(String orgId, String systemId) {
+        return getOne(orgId, (resource) -> Optional
+                .ofNullable(resource)
+                .map(UndervisningsforholdResource::getSystemId)
                 .map(Identifikator::getIdentifikatorverdi)
-                .map(id -> id.equals(systemId))
+                .map(_id -> _id.equals(systemId))
                 .orElse(false));
     }
 
 
 	@Override
     public void onAction(Event event) {
-        update(event, new TypeReference<List<FintResource<Undervisningsforhold>>>() {
-        });
+        List<UndervisningsforholdResource> data;
+        if (checkFintResourceCompatibility && fintResourceCompatibility.isFintResourceData(event.getData())) {
+            log.info("Compatibility: Converting FintResource<UndervisningsforholdResource> to UndervisningsforholdResource ...");
+            data = fintResourceCompatibility.convertResourceData(event.getData(), UndervisningsforholdResource.class);
+        } else {
+            data = objectMapper.convertValue(event.getData(), javaType);
+        }
+        data.forEach(linker::toResource);
+        update(event.getOrgId(), data);
+        log.info("Updated cache for {} with {} elements", event.getOrgId(), data.size());
     }
 }

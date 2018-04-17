@@ -1,15 +1,21 @@
 package no.fint.consumer.models.elev;
 
-import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+
 import lombok.extern.slf4j.Slf4j;
+
 import no.fint.cache.CacheService;
 import no.fint.consumer.config.Constants;
 import no.fint.consumer.config.ConsumerProps;
 import no.fint.consumer.event.ConsumerEventUtil;
 import no.fint.event.model.Event;
-import no.fint.model.relation.FintResource;
 import no.fint.model.felles.kompleksedatatyper.Identifikator;
+import no.fint.relations.FintResourceCompatibility;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -19,13 +25,20 @@ import java.util.List;
 import java.util.Optional;
 
 import no.fint.model.utdanning.elev.Elev;
+import no.fint.model.resource.utdanning.elev.ElevResource;
 import no.fint.model.utdanning.elev.ElevActions;
 
 @Slf4j
 @Service
-public class ElevCacheService extends CacheService<FintResource<Elev>> {
+public class ElevCacheService extends CacheService<ElevResource> {
 
     public static final String MODEL = Elev.class.getSimpleName().toLowerCase();
+
+    @Value("${fint.consumer.compatibility.fintresource:true}")
+    private boolean checkFintResourceCompatibility;
+
+    @Autowired
+    private FintResourceCompatibility fintResourceCompatibility;
 
     @Autowired
     private ConsumerEventUtil consumerEventUtil;
@@ -33,8 +46,18 @@ public class ElevCacheService extends CacheService<FintResource<Elev>> {
     @Autowired
     private ConsumerProps props;
 
+    @Autowired
+    private ElevLinker linker;
+
+    private JavaType javaType;
+
+    private ObjectMapper objectMapper;
+
     public ElevCacheService() {
         super(MODEL, ElevActions.GET_ALL_ELEV);
+        objectMapper = new ObjectMapper();
+        javaType = objectMapper.getTypeFactory().constructCollectionType(List.class, ElevResource.class);
+        objectMapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
     }
 
     @PostConstruct
@@ -59,50 +82,54 @@ public class ElevCacheService extends CacheService<FintResource<Elev>> {
     }
 
 
-    public Optional<FintResource<Elev>> getElevByBrukernavn(String orgId, String brukernavn) {
-        return getOne(orgId, (fintResource) -> Optional
-                .ofNullable(fintResource)
-                .map(FintResource::getResource)
-                .map(Elev::getBrukernavn)
+    public Optional<ElevResource> getElevByBrukernavn(String orgId, String brukernavn) {
+        return getOne(orgId, (resource) -> Optional
+                .ofNullable(resource)
+                .map(ElevResource::getBrukernavn)
                 .map(Identifikator::getIdentifikatorverdi)
-                .map(id -> id.equals(brukernavn))
+                .map(_id -> _id.equals(brukernavn))
                 .orElse(false));
     }
 
-    public Optional<FintResource<Elev>> getElevByElevnummer(String orgId, String elevnummer) {
-        return getOne(orgId, (fintResource) -> Optional
-                .ofNullable(fintResource)
-                .map(FintResource::getResource)
-                .map(Elev::getElevnummer)
+    public Optional<ElevResource> getElevByElevnummer(String orgId, String elevnummer) {
+        return getOne(orgId, (resource) -> Optional
+                .ofNullable(resource)
+                .map(ElevResource::getElevnummer)
                 .map(Identifikator::getIdentifikatorverdi)
-                .map(id -> id.equals(elevnummer))
+                .map(_id -> _id.equals(elevnummer))
                 .orElse(false));
     }
 
-    public Optional<FintResource<Elev>> getElevByFeidenavn(String orgId, String feidenavn) {
-        return getOne(orgId, (fintResource) -> Optional
-                .ofNullable(fintResource)
-                .map(FintResource::getResource)
-                .map(Elev::getFeidenavn)
+    public Optional<ElevResource> getElevByFeidenavn(String orgId, String feidenavn) {
+        return getOne(orgId, (resource) -> Optional
+                .ofNullable(resource)
+                .map(ElevResource::getFeidenavn)
                 .map(Identifikator::getIdentifikatorverdi)
-                .map(id -> id.equals(feidenavn))
+                .map(_id -> _id.equals(feidenavn))
                 .orElse(false));
     }
 
-    public Optional<FintResource<Elev>> getElevBySystemId(String orgId, String systemId) {
-        return getOne(orgId, (fintResource) -> Optional
-                .ofNullable(fintResource)
-                .map(FintResource::getResource)
-                .map(Elev::getSystemId)
+    public Optional<ElevResource> getElevBySystemId(String orgId, String systemId) {
+        return getOne(orgId, (resource) -> Optional
+                .ofNullable(resource)
+                .map(ElevResource::getSystemId)
                 .map(Identifikator::getIdentifikatorverdi)
-                .map(id -> id.equals(systemId))
+                .map(_id -> _id.equals(systemId))
                 .orElse(false));
     }
 
 
 	@Override
     public void onAction(Event event) {
-        update(event, new TypeReference<List<FintResource<Elev>>>() {
-        });
+        List<ElevResource> data;
+        if (checkFintResourceCompatibility && fintResourceCompatibility.isFintResourceData(event.getData())) {
+            log.info("Compatibility: Converting FintResource<ElevResource> to ElevResource ...");
+            data = fintResourceCompatibility.convertResourceData(event.getData(), ElevResource.class);
+        } else {
+            data = objectMapper.convertValue(event.getData(), javaType);
+        }
+        data.forEach(linker::toResource);
+        update(event.getOrgId(), data);
+        log.info("Updated cache for {} with {} elements", event.getOrgId(), data.size());
     }
 }

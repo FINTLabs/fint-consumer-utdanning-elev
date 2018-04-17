@@ -1,4 +1,4 @@
-package no.fint.consumer.models.skoleressurs;
+package no.fint.consumer.models.person;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -37,23 +37,23 @@ import java.util.Optional;
 
 import javax.naming.NameNotFoundException;
 
-import no.fint.model.resource.utdanning.elev.SkoleressursResource;
-import no.fint.model.utdanning.elev.ElevActions;
+import no.fint.model.resource.felles.PersonResource;
+import no.fint.model.felles.FellesActions;
 
 @Slf4j
 @CrossOrigin
 @RestController
-@RequestMapping(value = RestEndpoints.SKOLERESSURS, produces = {FintRelationsMediaType.APPLICATION_HAL_JSON_VALUE, MediaType.APPLICATION_JSON_UTF8_VALUE})
-public class SkoleressursController {
+@RequestMapping(value = RestEndpoints.PERSON, produces = {FintRelationsMediaType.APPLICATION_HAL_JSON_VALUE, MediaType.APPLICATION_JSON_UTF8_VALUE})
+public class PersonController {
 
     @Autowired
-    private SkoleressursCacheService cacheService;
+    private PersonCacheService cacheService;
 
     @Autowired
     private FintAuditService fintAuditService;
 
     @Autowired
-    private SkoleressursLinker linker;
+    private PersonLinker linker;
 
     @Autowired
     private ConsumerProps props;
@@ -93,7 +93,7 @@ public class SkoleressursController {
     }
 
     @GetMapping
-    public FintResources getSkoleressurs(
+    public FintResources getPerson(
             @RequestHeader(name = HeaderConstants.ORG_ID, required = false) String orgId,
             @RequestHeader(name = HeaderConstants.CLIENT, required = false) String client,
             @RequestParam(required = false) Long sinceTimeStamp) {
@@ -105,26 +105,26 @@ public class SkoleressursController {
         }
         log.info("OrgId: {}, Client: {}", orgId, client);
 
-        Event event = new Event(orgId, Constants.COMPONENT, ElevActions.GET_ALL_SKOLERESSURS, client);
+        Event event = new Event(orgId, Constants.COMPONENT, FellesActions.GET_ALL_PERSON, client);
         fintAuditService.audit(event);
 
         fintAuditService.audit(event, Status.CACHE);
 
-        List<SkoleressursResource> skoleressurs;
+        List<PersonResource> person;
         if (sinceTimeStamp == null) {
-            skoleressurs = cacheService.getAll(orgId);
+            person = cacheService.getAll(orgId);
         } else {
-            skoleressurs = cacheService.getAll(orgId, sinceTimeStamp);
+            person = cacheService.getAll(orgId, sinceTimeStamp);
         }
 
         fintAuditService.audit(event, Status.CACHE_RESPONSE, Status.SENT_TO_CLIENT);
 
-        return linker.toResources(skoleressurs);
+        return linker.toResources(person);
     }
 
 
-    @GetMapping("/feidenavn/{id}")
-    public SkoleressursResource getSkoleressursByFeidenavn(@PathVariable String id,
+    @GetMapping("/fodselsnummer/{id}")
+    public PersonResource getPersonByFodselsnummer(@PathVariable String id,
             @RequestHeader(name = HeaderConstants.ORG_ID, required = false) String orgId,
             @RequestHeader(name = HeaderConstants.CLIENT, required = false) String client) {
         if (props.isOverrideOrgId() || orgId == null) {
@@ -133,42 +133,18 @@ public class SkoleressursController {
         if (client == null) {
             client = props.getDefaultClient();
         }
-        log.info("Feidenavn: {}, OrgId: {}, Client: {}", id, orgId, client);
+        log.info("Fodselsnummer: {}, OrgId: {}, Client: {}", id, orgId, client);
 
-        Event event = new Event(orgId, Constants.COMPONENT, ElevActions.GET_SKOLERESSURS, client);
+        Event event = new Event(orgId, Constants.COMPONENT, FellesActions.GET_PERSON, client);
         fintAuditService.audit(event);
 
         fintAuditService.audit(event, Status.CACHE);
 
-        Optional<SkoleressursResource> skoleressurs = cacheService.getSkoleressursByFeidenavn(orgId, id);
+        Optional<PersonResource> person = cacheService.getPersonByFodselsnummer(orgId, id);
 
         fintAuditService.audit(event, Status.CACHE_RESPONSE, Status.SENT_TO_CLIENT);
 
-        return skoleressurs.orElseThrow(() -> new EntityNotFoundException(id));
-    }
-
-    @GetMapping("/systemid/{id}")
-    public SkoleressursResource getSkoleressursBySystemId(@PathVariable String id,
-            @RequestHeader(name = HeaderConstants.ORG_ID, required = false) String orgId,
-            @RequestHeader(name = HeaderConstants.CLIENT, required = false) String client) {
-        if (props.isOverrideOrgId() || orgId == null) {
-            orgId = props.getDefaultOrgId();
-        }
-        if (client == null) {
-            client = props.getDefaultClient();
-        }
-        log.info("SystemId: {}, OrgId: {}, Client: {}", id, orgId, client);
-
-        Event event = new Event(orgId, Constants.COMPONENT, ElevActions.GET_SKOLERESSURS, client);
-        fintAuditService.audit(event);
-
-        fintAuditService.audit(event, Status.CACHE);
-
-        Optional<SkoleressursResource> skoleressurs = cacheService.getSkoleressursBySystemId(orgId, id);
-
-        fintAuditService.audit(event, Status.CACHE_RESPONSE, Status.SENT_TO_CLIENT);
-
-        return skoleressurs.orElseThrow(() -> new EntityNotFoundException(id));
+        return person.orElseThrow(() -> new EntityNotFoundException(id));
     }
 
 
@@ -190,7 +166,7 @@ public class SkoleressursController {
         if (e.getResponseStatus() == null) {
             return ResponseEntity.status(HttpStatus.ACCEPTED).build();
         }
-        List<SkoleressursResource> result = objectMapper.convertValue(e.getData(), objectMapper.getTypeFactory().constructCollectionType(List.class, SkoleressursResource.class));
+        List<PersonResource> result = objectMapper.convertValue(e.getData(), objectMapper.getTypeFactory().constructCollectionType(List.class, PersonResource.class));
         switch (e.getResponseStatus()) {
             case ACCEPTED:
                 URI location = UriComponentsBuilder.fromUriString(linker.getSelfHref(result.get(0))).build().toUri();
@@ -206,14 +182,14 @@ public class SkoleressursController {
     }
 
     @PostMapping
-    public ResponseEntity postSkoleressurs(
+    public ResponseEntity postPerson(
             @RequestHeader(name = HeaderConstants.ORG_ID) String orgId,
             @RequestHeader(name = HeaderConstants.CLIENT) String client,
-            @RequestBody SkoleressursResource body
+            @RequestBody PersonResource body
     ) {
-        log.info("postSkoleressurs, OrgId: {}, Client: {}", orgId, client);
+        log.info("postPerson, OrgId: {}, Client: {}", orgId, client);
         log.trace("Body: {}", body);
-        Event event = new Event(orgId, Constants.COMPONENT, ElevActions.UPDATE_SKOLERESSURS, client);
+        Event event = new Event(orgId, Constants.COMPONENT, FellesActions.UPDATE_PERSON, client);
         event.addObject(objectMapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS).convertValue(body, Map.class));
         fintAuditService.audit(event);
 
@@ -226,17 +202,17 @@ public class SkoleressursController {
     }
 
   
-    @PutMapping("/systemid/{id}")
-    public ResponseEntity putSkoleressursBySystemId(
+    @PutMapping("/fodselsnummer/{id}")
+    public ResponseEntity putPersonByFodselsnummer(
             @PathVariable String id,
             @RequestHeader(name = HeaderConstants.ORG_ID) String orgId,
             @RequestHeader(name = HeaderConstants.CLIENT) String client,
-            @RequestBody SkoleressursResource body
+            @RequestBody PersonResource body
     ) {
-        log.info("putSkoleressursBySystemId {}, OrgId: {}, Client: {}", id, orgId, client);
+        log.info("putPersonByFodselsnummer {}, OrgId: {}, Client: {}", id, orgId, client);
         log.trace("Body: {}", body);
-        Event event = new Event(orgId, Constants.COMPONENT, ElevActions.UPDATE_SKOLERESSURS, client);
-        event.setQuery("systemid:" + id);
+        Event event = new Event(orgId, Constants.COMPONENT, FellesActions.UPDATE_PERSON, client);
+        event.setQuery("fodselsnummer:" + id);
         event.addObject(objectMapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS).convertValue(body, Map.class));
         fintAuditService.audit(event);
 
