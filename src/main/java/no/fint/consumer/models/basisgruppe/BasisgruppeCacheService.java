@@ -54,7 +54,7 @@ public class BasisgruppeCacheService extends CacheService<BasisgruppeResource> {
     private ObjectMapper objectMapper;
 
     public BasisgruppeCacheService() {
-        super(MODEL, ElevActions.GET_ALL_BASISGRUPPE);
+        super(MODEL, ElevActions.GET_ALL_BASISGRUPPE, ElevActions.UPDATE_BASISGRUPPE);
         objectMapper = new ObjectMapper();
         javaType = objectMapper.getTypeFactory().constructCollectionType(List.class, BasisgruppeResource.class);
         objectMapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
@@ -102,7 +102,12 @@ public class BasisgruppeCacheService extends CacheService<BasisgruppeResource> {
             data = objectMapper.convertValue(event.getData(), javaType);
         }
         data.forEach(linker::toResource);
-        update(event.getOrgId(), data);
-        log.info("Updated cache for {} with {} elements", event.getOrgId(), data.size());
+        if (ElevActions.valueOf(event.getAction()) == ElevActions.UPDATE_BASISGRUPPE) {
+            add(event.getOrgId(), data);
+            log.info("Added {} elements to cache for {}", data.size(), event.getOrgId());
+        } else {
+            update(event.getOrgId(), data);
+            log.info("Updated cache for {} with {} elements", event.getOrgId(), data.size());
+        }
     }
 }

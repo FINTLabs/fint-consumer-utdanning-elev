@@ -54,7 +54,7 @@ public class KontaktlarergruppeCacheService extends CacheService<Kontaktlarergru
     private ObjectMapper objectMapper;
 
     public KontaktlarergruppeCacheService() {
-        super(MODEL, ElevActions.GET_ALL_KONTAKTLARERGRUPPE);
+        super(MODEL, ElevActions.GET_ALL_KONTAKTLARERGRUPPE, ElevActions.UPDATE_KONTAKTLARERGRUPPE);
         objectMapper = new ObjectMapper();
         javaType = objectMapper.getTypeFactory().constructCollectionType(List.class, KontaktlarergruppeResource.class);
         objectMapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
@@ -102,7 +102,12 @@ public class KontaktlarergruppeCacheService extends CacheService<Kontaktlarergru
             data = objectMapper.convertValue(event.getData(), javaType);
         }
         data.forEach(linker::toResource);
-        update(event.getOrgId(), data);
-        log.info("Updated cache for {} with {} elements", event.getOrgId(), data.size());
+        if (ElevActions.valueOf(event.getAction()) == ElevActions.UPDATE_KONTAKTLARERGRUPPE) {
+            add(event.getOrgId(), data);
+            log.info("Added {} elements to cache for {}", data.size(), event.getOrgId());
+        } else {
+            update(event.getOrgId(), data);
+            log.info("Updated cache for {} with {} elements", event.getOrgId(), data.size());
+        }
     }
 }

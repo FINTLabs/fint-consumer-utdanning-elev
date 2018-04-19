@@ -54,7 +54,7 @@ public class SkoleressursCacheService extends CacheService<SkoleressursResource>
     private ObjectMapper objectMapper;
 
     public SkoleressursCacheService() {
-        super(MODEL, ElevActions.GET_ALL_SKOLERESSURS);
+        super(MODEL, ElevActions.GET_ALL_SKOLERESSURS, ElevActions.UPDATE_SKOLERESSURS);
         objectMapper = new ObjectMapper();
         javaType = objectMapper.getTypeFactory().constructCollectionType(List.class, SkoleressursResource.class);
         objectMapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
@@ -111,7 +111,12 @@ public class SkoleressursCacheService extends CacheService<SkoleressursResource>
             data = objectMapper.convertValue(event.getData(), javaType);
         }
         data.forEach(linker::toResource);
-        update(event.getOrgId(), data);
-        log.info("Updated cache for {} with {} elements", event.getOrgId(), data.size());
+        if (ElevActions.valueOf(event.getAction()) == ElevActions.UPDATE_SKOLERESSURS) {
+            add(event.getOrgId(), data);
+            log.info("Added {} elements to cache for {}", data.size(), event.getOrgId());
+        } else {
+            update(event.getOrgId(), data);
+            log.info("Updated cache for {} with {} elements", event.getOrgId(), data.size());
+        }
     }
 }

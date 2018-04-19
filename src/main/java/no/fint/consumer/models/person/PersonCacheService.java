@@ -54,7 +54,7 @@ public class PersonCacheService extends CacheService<PersonResource> {
     private ObjectMapper objectMapper;
 
     public PersonCacheService() {
-        super(MODEL, FellesActions.GET_ALL_PERSON);
+        super(MODEL, FellesActions.GET_ALL_PERSON, FellesActions.UPDATE_PERSON);
         objectMapper = new ObjectMapper();
         javaType = objectMapper.getTypeFactory().constructCollectionType(List.class, PersonResource.class);
         objectMapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
@@ -102,7 +102,12 @@ public class PersonCacheService extends CacheService<PersonResource> {
             data = objectMapper.convertValue(event.getData(), javaType);
         }
         data.forEach(linker::toResource);
-        update(event.getOrgId(), data);
-        log.info("Updated cache for {} with {} elements", event.getOrgId(), data.size());
+        if (FellesActions.valueOf(event.getAction()) == FellesActions.UPDATE_PERSON) {
+            add(event.getOrgId(), data);
+            log.info("Added {} elements to cache for {}", data.size(), event.getOrgId());
+        } else {
+            update(event.getOrgId(), data);
+            log.info("Updated cache for {} with {} elements", event.getOrgId(), data.size());
+        }
     }
 }

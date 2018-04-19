@@ -54,7 +54,7 @@ public class ElevforholdCacheService extends CacheService<ElevforholdResource> {
     private ObjectMapper objectMapper;
 
     public ElevforholdCacheService() {
-        super(MODEL, ElevActions.GET_ALL_ELEVFORHOLD);
+        super(MODEL, ElevActions.GET_ALL_ELEVFORHOLD, ElevActions.UPDATE_ELEVFORHOLD);
         objectMapper = new ObjectMapper();
         javaType = objectMapper.getTypeFactory().constructCollectionType(List.class, ElevforholdResource.class);
         objectMapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
@@ -102,7 +102,12 @@ public class ElevforholdCacheService extends CacheService<ElevforholdResource> {
             data = objectMapper.convertValue(event.getData(), javaType);
         }
         data.forEach(linker::toResource);
-        update(event.getOrgId(), data);
-        log.info("Updated cache for {} with {} elements", event.getOrgId(), data.size());
+        if (ElevActions.valueOf(event.getAction()) == ElevActions.UPDATE_ELEVFORHOLD) {
+            add(event.getOrgId(), data);
+            log.info("Added {} elements to cache for {}", data.size(), event.getOrgId());
+        } else {
+            update(event.getOrgId(), data);
+            log.info("Updated cache for {} with {} elements", event.getOrgId(), data.size());
+        }
     }
 }

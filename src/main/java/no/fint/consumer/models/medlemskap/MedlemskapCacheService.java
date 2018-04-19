@@ -54,7 +54,7 @@ public class MedlemskapCacheService extends CacheService<MedlemskapResource> {
     private ObjectMapper objectMapper;
 
     public MedlemskapCacheService() {
-        super(MODEL, ElevActions.GET_ALL_MEDLEMSKAP);
+        super(MODEL, ElevActions.GET_ALL_MEDLEMSKAP, ElevActions.UPDATE_MEDLEMSKAP);
         objectMapper = new ObjectMapper();
         javaType = objectMapper.getTypeFactory().constructCollectionType(List.class, MedlemskapResource.class);
         objectMapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
@@ -102,7 +102,12 @@ public class MedlemskapCacheService extends CacheService<MedlemskapResource> {
             data = objectMapper.convertValue(event.getData(), javaType);
         }
         data.forEach(linker::toResource);
-        update(event.getOrgId(), data);
-        log.info("Updated cache for {} with {} elements", event.getOrgId(), data.size());
+        if (ElevActions.valueOf(event.getAction()) == ElevActions.UPDATE_MEDLEMSKAP) {
+            add(event.getOrgId(), data);
+            log.info("Added {} elements to cache for {}", data.size(), event.getOrgId());
+        } else {
+            update(event.getOrgId(), data);
+            log.info("Updated cache for {} with {} elements", event.getOrgId(), data.size());
+        }
     }
 }

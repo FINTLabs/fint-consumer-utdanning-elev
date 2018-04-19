@@ -54,7 +54,7 @@ public class ElevCacheService extends CacheService<ElevResource> {
     private ObjectMapper objectMapper;
 
     public ElevCacheService() {
-        super(MODEL, ElevActions.GET_ALL_ELEV);
+        super(MODEL, ElevActions.GET_ALL_ELEV, ElevActions.UPDATE_ELEV);
         objectMapper = new ObjectMapper();
         javaType = objectMapper.getTypeFactory().constructCollectionType(List.class, ElevResource.class);
         objectMapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
@@ -129,7 +129,12 @@ public class ElevCacheService extends CacheService<ElevResource> {
             data = objectMapper.convertValue(event.getData(), javaType);
         }
         data.forEach(linker::toResource);
-        update(event.getOrgId(), data);
-        log.info("Updated cache for {} with {} elements", event.getOrgId(), data.size());
+        if (ElevActions.valueOf(event.getAction()) == ElevActions.UPDATE_ELEV) {
+            add(event.getOrgId(), data);
+            log.info("Added {} elements to cache for {}", data.size(), event.getOrgId());
+        } else {
+            update(event.getOrgId(), data);
+            log.info("Updated cache for {} with {} elements", event.getOrgId(), data.size());
+        }
     }
 }

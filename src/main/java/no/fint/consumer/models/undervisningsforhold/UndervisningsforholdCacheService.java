@@ -54,7 +54,7 @@ public class UndervisningsforholdCacheService extends CacheService<Undervisnings
     private ObjectMapper objectMapper;
 
     public UndervisningsforholdCacheService() {
-        super(MODEL, ElevActions.GET_ALL_UNDERVISNINGSFORHOLD);
+        super(MODEL, ElevActions.GET_ALL_UNDERVISNINGSFORHOLD, ElevActions.UPDATE_UNDERVISNINGSFORHOLD);
         objectMapper = new ObjectMapper();
         javaType = objectMapper.getTypeFactory().constructCollectionType(List.class, UndervisningsforholdResource.class);
         objectMapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
@@ -102,7 +102,12 @@ public class UndervisningsforholdCacheService extends CacheService<Undervisnings
             data = objectMapper.convertValue(event.getData(), javaType);
         }
         data.forEach(linker::toResource);
-        update(event.getOrgId(), data);
-        log.info("Updated cache for {} with {} elements", event.getOrgId(), data.size());
+        if (ElevActions.valueOf(event.getAction()) == ElevActions.UPDATE_UNDERVISNINGSFORHOLD) {
+            add(event.getOrgId(), data);
+            log.info("Added {} elements to cache for {}", data.size(), event.getOrgId());
+        } else {
+            update(event.getOrgId(), data);
+            log.info("Updated cache for {} with {} elements", event.getOrgId(), data.size());
+        }
     }
 }
