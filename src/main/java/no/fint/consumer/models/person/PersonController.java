@@ -212,7 +212,7 @@ public class PersonController {
         log.info("putPersonByFodselsnummer {}, OrgId: {}, Client: {}", id, orgId, client);
         log.trace("Body: {}", body);
         Event event = new Event(orgId, Constants.COMPONENT, FellesActions.UPDATE_PERSON, client);
-        event.setQuery("fodselsnummer:" + id);
+        event.setQuery("fodselsnummer/" + id);
         event.addObject(objectMapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS).convertValue(body, Map.class));
         fintAuditService.audit(event);
 

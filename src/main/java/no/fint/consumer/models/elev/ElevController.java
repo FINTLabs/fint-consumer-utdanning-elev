@@ -284,7 +284,7 @@ public class ElevController {
         log.info("putElevByElevnummer {}, OrgId: {}, Client: {}", id, orgId, client);
         log.trace("Body: {}", body);
         Event event = new Event(orgId, Constants.COMPONENT, ElevActions.UPDATE_ELEV, client);
-        event.setQuery("elevnummer:" + id);
+        event.setQuery("elevnummer/" + id);
         event.addObject(objectMapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS).convertValue(body, Map.class));
         fintAuditService.audit(event);
 

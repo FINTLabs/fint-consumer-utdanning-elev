@@ -236,7 +236,7 @@ public class SkoleressursController {
         log.info("putSkoleressursBySystemId {}, OrgId: {}, Client: {}", id, orgId, client);
         log.trace("Body: {}", body);
         Event event = new Event(orgId, Constants.COMPONENT, ElevActions.UPDATE_SKOLERESSURS, client);
-        event.setQuery("systemid:" + id);
+        event.setQuery("systemid/" + id);
         event.addObject(objectMapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS).convertValue(body, Map.class));
         fintAuditService.audit(event);
 
