@@ -171,7 +171,7 @@ public class ElevController {
         return elev.orElseThrow(() -> new EntityNotFoundException(id));
     }
 
-    @GetMapping("/feidenavn/{id}")
+    @GetMapping("/feidenavn/{id:.+}")
     public ElevResource getElevByFeidenavn(@PathVariable String id,
             @RequestHeader(name = HeaderConstants.ORG_ID, required = false) String orgId,
             @RequestHeader(name = HeaderConstants.CLIENT, required = false) String client) {
