@@ -15,6 +15,7 @@ import no.fint.consumer.status.StatusCache;
 import no.fint.consumer.utils.RestEndpoints;
 
 import no.fint.event.model.Event;
+import no.fint.event.model.EventResponse;
 import no.fint.event.model.HeaderConstants;
 import no.fint.event.model.Status;
 
@@ -123,7 +124,7 @@ public class UndervisningsforholdController {
     }
 
 
-    @GetMapping("/systemid/{id}")
+    @GetMapping("/systemid/{id:.+}")
     public UndervisningsforholdResource getUndervisningsforholdBySystemId(@PathVariable String id,
             @RequestHeader(name = HeaderConstants.ORG_ID, required = false) String orgId,
             @RequestHeader(name = HeaderConstants.CLIENT, required = false) String client) {
@@ -155,32 +156,32 @@ public class UndervisningsforholdController {
     //
     @ExceptionHandler(UpdateEntityMismatchException.class)
     public ResponseEntity handleUpdateEntityMismatch(Exception e) {
-        return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
+        return ResponseEntity.badRequest().body(e);
     }
 
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity handleEntityNotFound(Exception e) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(e.getMessage()));
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e);
     }
 
     @ExceptionHandler(CreateEntityMismatchException.class)
     public ResponseEntity handleCreateEntityMismatch(Exception e) {
-        return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
+        return ResponseEntity.badRequest().body(e);
     }
 
     @ExceptionHandler(EntityFoundException.class)
     public ResponseEntity handleEntityFound(Exception e) {
-        return ResponseEntity.status(HttpStatus.FOUND).body(new ErrorResponse(e.getMessage()));
+        return ResponseEntity.status(HttpStatus.FOUND).body(e);
     }
 
     @ExceptionHandler(NameNotFoundException.class)
     public ResponseEntity handleNameNotFound(Exception e) {
-        return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
+        return ResponseEntity.badRequest().body(e);
     }
 
     @ExceptionHandler(UnknownHostException.class)
     public ResponseEntity handleUnkownHost(Exception e) {
-        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(new ErrorResponse(e.getMessage()));
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(e);
     }
 
 }
