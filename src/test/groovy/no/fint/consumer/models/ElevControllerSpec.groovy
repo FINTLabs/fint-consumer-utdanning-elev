@@ -1,5 +1,6 @@
 package no.fint.consumer.models
 
+import no.fint.consumer.status.StatusCache
 import no.fint.consumer.utils.RestEndpoints
 import org.apache.commons.io.IOUtils
 import org.springframework.beans.factory.annotation.Autowired
@@ -20,6 +21,9 @@ class ElevControllerSpec extends Specification {
 
     @Autowired
     private TestRestTemplate restTemplate;
+
+    @Autowired
+    private StatusCache statusCache
 
     def "PUT elev.json and GET /status/"() {
         given:
@@ -45,5 +49,14 @@ class ElevControllerSpec extends Specification {
         then:
         result.getStatusCode() == HttpStatus.ACCEPTED
 
+        when:
+        def corrid = location.path.substring(location.path.lastIndexOf('/')+1)
+        def event = statusCache.get(corrid)
+        println(corrid)
+        println(event.data)
+
+        then:
+        event
+        event.data[0].feidenavn.identifikatorverdi == "test@sundetvgs.haugfk.no"
     }
 }
