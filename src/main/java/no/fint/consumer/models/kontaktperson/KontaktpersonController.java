@@ -1,4 +1,4 @@
-package no.fint.consumer.models.medlemskap;
+package no.fint.consumer.models.kontaktperson;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -35,23 +35,23 @@ import java.util.Optional;
 
 import javax.naming.NameNotFoundException;
 
-import no.fint.model.resource.utdanning.elev.MedlemskapResource;
-import no.fint.model.utdanning.elev.ElevActions;
+import no.fint.model.resource.felles.KontaktpersonResource;
+import no.fint.model.felles.FellesActions;
 
 @Slf4j
 @CrossOrigin
 @RestController
-@RequestMapping(value = RestEndpoints.MEDLEMSKAP, produces = {FintRelationsMediaType.APPLICATION_HAL_JSON_VALUE, MediaType.APPLICATION_JSON_UTF8_VALUE})
-public class MedlemskapController {
+@RequestMapping(value = RestEndpoints.KONTAKTPERSON, produces = {FintRelationsMediaType.APPLICATION_HAL_JSON_VALUE, MediaType.APPLICATION_JSON_UTF8_VALUE})
+public class KontaktpersonController {
 
     @Autowired
-    private MedlemskapCacheService cacheService;
+    private KontaktpersonCacheService cacheService;
 
     @Autowired
     private FintAuditService fintAuditService;
 
     @Autowired
-    private MedlemskapLinker linker;
+    private KontaktpersonLinker linker;
 
     @Autowired
     private ConsumerProps props;
@@ -91,7 +91,7 @@ public class MedlemskapController {
     }
 
     @GetMapping
-    public FintResources getMedlemskap(
+    public FintResources getKontaktperson(
             @RequestHeader(name = HeaderConstants.ORG_ID, required = false) String orgId,
             @RequestHeader(name = HeaderConstants.CLIENT, required = false) String client,
             @RequestParam(required = false) Long sinceTimeStamp) {
@@ -103,26 +103,26 @@ public class MedlemskapController {
         }
         log.debug("OrgId: {}, Client: {}", orgId, client);
 
-        Event event = new Event(orgId, Constants.COMPONENT, ElevActions.GET_ALL_MEDLEMSKAP, client);
+        Event event = new Event(orgId, Constants.COMPONENT, FellesActions.GET_ALL_KONTAKTPERSON, client);
         fintAuditService.audit(event);
 
         fintAuditService.audit(event, Status.CACHE);
 
-        List<MedlemskapResource> medlemskap;
+        List<KontaktpersonResource> kontaktperson;
         if (sinceTimeStamp == null) {
-            medlemskap = cacheService.getAll(orgId);
+            kontaktperson = cacheService.getAll(orgId);
         } else {
-            medlemskap = cacheService.getAll(orgId, sinceTimeStamp);
+            kontaktperson = cacheService.getAll(orgId, sinceTimeStamp);
         }
 
         fintAuditService.audit(event, Status.CACHE_RESPONSE, Status.SENT_TO_CLIENT);
 
-        return linker.toResources(medlemskap);
+        return linker.toResources(kontaktperson);
     }
 
 
     @GetMapping("/systemid/{id:.+}")
-    public MedlemskapResource getMedlemskapBySystemId(
+    public KontaktpersonResource getKontaktpersonBySystemId(
             @PathVariable String id,
             @RequestHeader(name = HeaderConstants.ORG_ID, required = false) String orgId,
             @RequestHeader(name = HeaderConstants.CLIENT, required = false) String client) {
@@ -134,17 +134,17 @@ public class MedlemskapController {
         }
         log.debug("SystemId: {}, OrgId: {}, Client: {}", id, orgId, client);
 
-        Event event = new Event(orgId, Constants.COMPONENT, ElevActions.GET_MEDLEMSKAP, client);
+        Event event = new Event(orgId, Constants.COMPONENT, FellesActions.GET_KONTAKTPERSON, client);
         event.setQuery("systemid/" + id);
         fintAuditService.audit(event);
 
         fintAuditService.audit(event, Status.CACHE);
 
-        Optional<MedlemskapResource> medlemskap = cacheService.getMedlemskapBySystemId(orgId, id);
+        Optional<KontaktpersonResource> kontaktperson = cacheService.getKontaktpersonBySystemId(orgId, id);
 
         fintAuditService.audit(event, Status.CACHE_RESPONSE, Status.SENT_TO_CLIENT);
 
-        return medlemskap.map(linker::toResource).orElseThrow(() -> new EntityNotFoundException(id));
+        return kontaktperson.map(linker::toResource).orElseThrow(() -> new EntityNotFoundException(id));
     }
 
 

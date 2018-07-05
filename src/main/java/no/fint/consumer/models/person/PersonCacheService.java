@@ -1,4 +1,4 @@
-package no.fint.consumer.models.skoleressurs;
+package no.fint.consumer.models.person;
 
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -25,15 +25,15 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import no.fint.model.utdanning.elev.Skoleressurs;
-import no.fint.model.resource.utdanning.elev.SkoleressursResource;
-import no.fint.model.utdanning.elev.ElevActions;
+import no.fint.model.felles.Person;
+import no.fint.model.resource.felles.PersonResource;
+import no.fint.model.felles.FellesActions;
 
 @Slf4j
 @Service
-public class SkoleressursCacheService extends CacheService<SkoleressursResource> {
+public class PersonCacheService extends CacheService<PersonResource> {
 
-    public static final String MODEL = Skoleressurs.class.getSimpleName().toLowerCase();
+    public static final String MODEL = Person.class.getSimpleName().toLowerCase();
 
     @Value("${fint.consumer.compatibility.fintresource:true}")
     private boolean checkFintResourceCompatibility;
@@ -48,16 +48,16 @@ public class SkoleressursCacheService extends CacheService<SkoleressursResource>
     private ConsumerProps props;
 
     @Autowired
-    private SkoleressursLinker linker;
+    private PersonLinker linker;
 
     private JavaType javaType;
 
     private ObjectMapper objectMapper;
 
-    public SkoleressursCacheService() {
-        super(MODEL, ElevActions.GET_ALL_SKOLERESSURS, ElevActions.UPDATE_SKOLERESSURS);
+    public PersonCacheService() {
+        super(MODEL, FellesActions.GET_ALL_PERSON, FellesActions.UPDATE_PERSON);
         objectMapper = new ObjectMapper();
-        javaType = objectMapper.getTypeFactory().constructCollectionType(List.class, SkoleressursResource.class);
+        javaType = objectMapper.getTypeFactory().constructCollectionType(List.class, PersonResource.class);
         objectMapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
     }
 
@@ -66,7 +66,7 @@ public class SkoleressursCacheService extends CacheService<SkoleressursResource>
         Arrays.stream(props.getOrgs()).forEach(this::createCache);
     }
 
-    @Scheduled(initialDelayString = ConsumerProps.CACHE_INITIALDELAY_SKOLERESSURS, fixedRateString = ConsumerProps.CACHE_FIXEDRATE_SKOLERESSURS)
+    @Scheduled(initialDelayString = ConsumerProps.CACHE_INITIALDELAY_PERSON, fixedRateString = ConsumerProps.CACHE_FIXEDRATE_PERSON)
     public void populateCacheAll() {
         Arrays.stream(props.getOrgs()).forEach(this::populateCache);
     }
@@ -77,42 +77,33 @@ public class SkoleressursCacheService extends CacheService<SkoleressursResource>
 	}
 
     private void populateCache(String orgId) {
-		log.info("Populating Skoleressurs cache for {}", orgId);
-        Event event = new Event(orgId, Constants.COMPONENT, ElevActions.GET_ALL_SKOLERESSURS, Constants.CACHE_SERVICE);
+		log.info("Populating Person cache for {}", orgId);
+        Event event = new Event(orgId, Constants.COMPONENT, FellesActions.GET_ALL_PERSON, Constants.CACHE_SERVICE);
         consumerEventUtil.send(event);
     }
 
 
-    public Optional<SkoleressursResource> getSkoleressursByFeidenavn(String orgId, String feidenavn) {
+    public Optional<PersonResource> getPersonByFodselsnummer(String orgId, String fodselsnummer) {
         return getOne(orgId, (resource) -> Optional
                 .ofNullable(resource)
-                .map(SkoleressursResource::getFeidenavn)
+                .map(PersonResource::getFodselsnummer)
                 .map(Identifikator::getIdentifikatorverdi)
-                .map(_id -> _id.equals(feidenavn))
-                .orElse(false));
-    }
-
-    public Optional<SkoleressursResource> getSkoleressursBySystemId(String orgId, String systemId) {
-        return getOne(orgId, (resource) -> Optional
-                .ofNullable(resource)
-                .map(SkoleressursResource::getSystemId)
-                .map(Identifikator::getIdentifikatorverdi)
-                .map(_id -> _id.equals(systemId))
+                .map(_id -> _id.equals(fodselsnummer))
                 .orElse(false));
     }
 
 
 	@Override
     public void onAction(Event event) {
-        List<SkoleressursResource> data;
+        List<PersonResource> data;
         if (checkFintResourceCompatibility && fintResourceCompatibility.isFintResourceData(event.getData())) {
-            log.info("Compatibility: Converting FintResource<SkoleressursResource> to SkoleressursResource ...");
-            data = fintResourceCompatibility.convertResourceData(event.getData(), SkoleressursResource.class);
+            log.info("Compatibility: Converting FintResource<PersonResource> to PersonResource ...");
+            data = fintResourceCompatibility.convertResourceData(event.getData(), PersonResource.class);
         } else {
             data = objectMapper.convertValue(event.getData(), javaType);
         }
         data.forEach(linker::mapLinks);
-        if (ElevActions.valueOf(event.getAction()) == ElevActions.UPDATE_SKOLERESSURS) {
+        if (FellesActions.valueOf(event.getAction()) == FellesActions.UPDATE_PERSON) {
             if (event.getResponseStatus() == ResponseStatus.ACCEPTED || event.getResponseStatus() == ResponseStatus.CONFLICT) {
                 add(event.getOrgId(), data);
                 log.info("Added {} elements to cache for {}", data.size(), event.getOrgId());

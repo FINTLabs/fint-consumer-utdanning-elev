@@ -1,4 +1,4 @@
-package no.fint.consumer.models.skoleressurs;
+package no.fint.consumer.models.person;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -35,23 +35,23 @@ import java.util.Optional;
 
 import javax.naming.NameNotFoundException;
 
-import no.fint.model.resource.utdanning.elev.SkoleressursResource;
-import no.fint.model.utdanning.elev.ElevActions;
+import no.fint.model.resource.felles.PersonResource;
+import no.fint.model.felles.FellesActions;
 
 @Slf4j
 @CrossOrigin
 @RestController
-@RequestMapping(value = RestEndpoints.SKOLERESSURS, produces = {FintRelationsMediaType.APPLICATION_HAL_JSON_VALUE, MediaType.APPLICATION_JSON_UTF8_VALUE})
-public class SkoleressursController {
+@RequestMapping(value = RestEndpoints.PERSON, produces = {FintRelationsMediaType.APPLICATION_HAL_JSON_VALUE, MediaType.APPLICATION_JSON_UTF8_VALUE})
+public class PersonController {
 
     @Autowired
-    private SkoleressursCacheService cacheService;
+    private PersonCacheService cacheService;
 
     @Autowired
     private FintAuditService fintAuditService;
 
     @Autowired
-    private SkoleressursLinker linker;
+    private PersonLinker linker;
 
     @Autowired
     private ConsumerProps props;
@@ -91,7 +91,7 @@ public class SkoleressursController {
     }
 
     @GetMapping
-    public FintResources getSkoleressurs(
+    public FintResources getPerson(
             @RequestHeader(name = HeaderConstants.ORG_ID, required = false) String orgId,
             @RequestHeader(name = HeaderConstants.CLIENT, required = false) String client,
             @RequestParam(required = false) Long sinceTimeStamp) {
@@ -103,26 +103,26 @@ public class SkoleressursController {
         }
         log.debug("OrgId: {}, Client: {}", orgId, client);
 
-        Event event = new Event(orgId, Constants.COMPONENT, ElevActions.GET_ALL_SKOLERESSURS, client);
+        Event event = new Event(orgId, Constants.COMPONENT, FellesActions.GET_ALL_PERSON, client);
         fintAuditService.audit(event);
 
         fintAuditService.audit(event, Status.CACHE);
 
-        List<SkoleressursResource> skoleressurs;
+        List<PersonResource> person;
         if (sinceTimeStamp == null) {
-            skoleressurs = cacheService.getAll(orgId);
+            person = cacheService.getAll(orgId);
         } else {
-            skoleressurs = cacheService.getAll(orgId, sinceTimeStamp);
+            person = cacheService.getAll(orgId, sinceTimeStamp);
         }
 
         fintAuditService.audit(event, Status.CACHE_RESPONSE, Status.SENT_TO_CLIENT);
 
-        return linker.toResources(skoleressurs);
+        return linker.toResources(person);
     }
 
 
-    @GetMapping("/feidenavn/{id:.+}")
-    public SkoleressursResource getSkoleressursByFeidenavn(
+    @GetMapping("/fodselsnummer/{id:.+}")
+    public PersonResource getPersonByFodselsnummer(
             @PathVariable String id,
             @RequestHeader(name = HeaderConstants.ORG_ID, required = false) String orgId,
             @RequestHeader(name = HeaderConstants.CLIENT, required = false) String client) {
@@ -132,45 +132,19 @@ public class SkoleressursController {
         if (client == null) {
             client = props.getDefaultClient();
         }
-        log.debug("Feidenavn: {}, OrgId: {}, Client: {}", id, orgId, client);
+        log.debug("Fodselsnummer: {}, OrgId: {}, Client: {}", id, orgId, client);
 
-        Event event = new Event(orgId, Constants.COMPONENT, ElevActions.GET_SKOLERESSURS, client);
-        event.setQuery("feidenavn/" + id);
+        Event event = new Event(orgId, Constants.COMPONENT, FellesActions.GET_PERSON, client);
+        event.setQuery("fodselsnummer/" + id);
         fintAuditService.audit(event);
 
         fintAuditService.audit(event, Status.CACHE);
 
-        Optional<SkoleressursResource> skoleressurs = cacheService.getSkoleressursByFeidenavn(orgId, id);
+        Optional<PersonResource> person = cacheService.getPersonByFodselsnummer(orgId, id);
 
         fintAuditService.audit(event, Status.CACHE_RESPONSE, Status.SENT_TO_CLIENT);
 
-        return skoleressurs.map(linker::toResource).orElseThrow(() -> new EntityNotFoundException(id));
-    }
-
-    @GetMapping("/systemid/{id:.+}")
-    public SkoleressursResource getSkoleressursBySystemId(
-            @PathVariable String id,
-            @RequestHeader(name = HeaderConstants.ORG_ID, required = false) String orgId,
-            @RequestHeader(name = HeaderConstants.CLIENT, required = false) String client) {
-        if (props.isOverrideOrgId() || orgId == null) {
-            orgId = props.getDefaultOrgId();
-        }
-        if (client == null) {
-            client = props.getDefaultClient();
-        }
-        log.debug("SystemId: {}, OrgId: {}, Client: {}", id, orgId, client);
-
-        Event event = new Event(orgId, Constants.COMPONENT, ElevActions.GET_SKOLERESSURS, client);
-        event.setQuery("systemid/" + id);
-        fintAuditService.audit(event);
-
-        fintAuditService.audit(event, Status.CACHE);
-
-        Optional<SkoleressursResource> skoleressurs = cacheService.getSkoleressursBySystemId(orgId, id);
-
-        fintAuditService.audit(event, Status.CACHE_RESPONSE, Status.SENT_TO_CLIENT);
-
-        return skoleressurs.map(linker::toResource).orElseThrow(() -> new EntityNotFoundException(id));
+        return person.map(linker::toResource).orElseThrow(() -> new EntityNotFoundException(id));
     }
 
 
@@ -193,7 +167,7 @@ public class SkoleressursController {
         if (event.getResponseStatus() == null) {
             return ResponseEntity.status(HttpStatus.ACCEPTED).build();
         }
-        List<SkoleressursResource> result = objectMapper.convertValue(event.getData(), objectMapper.getTypeFactory().constructCollectionType(List.class, SkoleressursResource.class));
+        List<PersonResource> result = objectMapper.convertValue(event.getData(), objectMapper.getTypeFactory().constructCollectionType(List.class, PersonResource.class));
         switch (event.getResponseStatus()) {
             case ACCEPTED:
                 URI location = UriComponentsBuilder.fromUriString(linker.getSelfHref(result.get(0))).build().toUri();
@@ -210,16 +184,16 @@ public class SkoleressursController {
     }
 
     @PostMapping
-    public ResponseEntity postSkoleressurs(
+    public ResponseEntity postPerson(
             @RequestHeader(name = HeaderConstants.ORG_ID) String orgId,
             @RequestHeader(name = HeaderConstants.CLIENT) String client,
-            @RequestBody SkoleressursResource body,
+            @RequestBody PersonResource body,
             @RequestParam(name = "validate", required = false) boolean validate
     ) {
-        log.debug("postSkoleressurs, Validate: {}, OrgId: {}, Client: {}", validate, orgId, client);
+        log.debug("postPerson, Validate: {}, OrgId: {}, Client: {}", validate, orgId, client);
         log.trace("Body: {}", body);
         linker.mapLinks(body);
-        Event event = new Event(orgId, Constants.COMPONENT, ElevActions.UPDATE_SKOLERESSURS, client);
+        Event event = new Event(orgId, Constants.COMPONENT, FellesActions.UPDATE_PERSON, client);
         event.addObject(objectMapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS).convertValue(body, Map.class));
         event.setOperation(Operation.CREATE);
         if (validate) {
@@ -237,42 +211,18 @@ public class SkoleressursController {
     }
 
   
-    @PutMapping("/feidenavn/{id:.+}")
-    public ResponseEntity putSkoleressursByFeidenavn(
+    @PutMapping("/fodselsnummer/{id:.+}")
+    public ResponseEntity putPersonByFodselsnummer(
             @PathVariable String id,
             @RequestHeader(name = HeaderConstants.ORG_ID) String orgId,
             @RequestHeader(name = HeaderConstants.CLIENT) String client,
-            @RequestBody SkoleressursResource body
+            @RequestBody PersonResource body
     ) {
-        log.debug("putSkoleressursByFeidenavn {}, OrgId: {}, Client: {}", id, orgId, client);
+        log.debug("putPersonByFodselsnummer {}, OrgId: {}, Client: {}", id, orgId, client);
         log.trace("Body: {}", body);
         linker.mapLinks(body);
-        Event event = new Event(orgId, Constants.COMPONENT, ElevActions.UPDATE_SKOLERESSURS, client);
-        event.setQuery("feidenavn/" + id);
-        event.addObject(objectMapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS).convertValue(body, Map.class));
-        event.setOperation(Operation.UPDATE);
-        fintAuditService.audit(event);
-
-        consumerEventUtil.send(event);
-
-        statusCache.put(event.getCorrId(), event);
-
-        URI location = UriComponentsBuilder.fromUriString(linker.self()).path("status/{id}").buildAndExpand(event.getCorrId()).toUri();
-        return ResponseEntity.status(HttpStatus.ACCEPTED).location(location).build();
-    }
-  
-    @PutMapping("/systemid/{id:.+}")
-    public ResponseEntity putSkoleressursBySystemId(
-            @PathVariable String id,
-            @RequestHeader(name = HeaderConstants.ORG_ID) String orgId,
-            @RequestHeader(name = HeaderConstants.CLIENT) String client,
-            @RequestBody SkoleressursResource body
-    ) {
-        log.debug("putSkoleressursBySystemId {}, OrgId: {}, Client: {}", id, orgId, client);
-        log.trace("Body: {}", body);
-        linker.mapLinks(body);
-        Event event = new Event(orgId, Constants.COMPONENT, ElevActions.UPDATE_SKOLERESSURS, client);
-        event.setQuery("systemid/" + id);
+        Event event = new Event(orgId, Constants.COMPONENT, FellesActions.UPDATE_PERSON, client);
+        event.setQuery("fodselsnummer/" + id);
         event.addObject(objectMapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS).convertValue(body, Map.class));
         event.setOperation(Operation.UPDATE);
         fintAuditService.audit(event);

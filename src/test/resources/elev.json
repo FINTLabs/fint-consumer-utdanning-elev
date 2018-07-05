@@ -1,0 +1,35 @@
+{
+  "brukernavn": {
+    "identifikatorverdi": "Yougung",
+    "gyldighetsperiode": {
+      "start": "2010-06-04T00:00:00Z",
+      "slutt": "2099-12-31T00:00:00Z"
+    }
+  },
+  "elevnummer": {
+    "identifikatorverdi": "500001"
+  },
+  "feidenavn": {
+    "identifikatorverdi": "test@sundetvgs.haugfk.no"
+  },
+  "systemId": {
+    "identifikatorverdi": "a0611475-f278-4e5f-ba1b-bdfe440b6f71"
+  },
+  "_links": {
+    "elevforhold": [
+      {
+        "href": "https://beta.felleskomponent.no/utdanning/elev/elevforhold/systemid/E_500001_1"
+      }
+    ],
+    "person": [
+      {
+        "href": "https://beta.felleskomponent.no/utdanning/elev/person/fodselsnummer/14029923273"
+      }
+    ],
+    "self": [
+      {
+        "href": "https://beta.felleskomponent.no/utdanning/elev/elev/elevnummer/500001"
+      }
+    ]
+  }
+}

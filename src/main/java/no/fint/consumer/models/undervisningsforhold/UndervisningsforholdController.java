@@ -1,27 +1,41 @@
 package no.fint.consumer.models.undervisningsforhold;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.common.collect.ImmutableMap;
 import lombok.extern.slf4j.Slf4j;
+
 import no.fint.audit.FintAuditService;
+
 import no.fint.consumer.config.Constants;
 import no.fint.consumer.config.ConsumerProps;
+import no.fint.consumer.event.ConsumerEventUtil;
+import no.fint.consumer.exceptions.*;
+import no.fint.consumer.status.StatusCache;
 import no.fint.consumer.utils.RestEndpoints;
-import no.fint.event.model.Event;
-import no.fint.event.model.HeaderConstants;
-import no.fint.event.model.Status;
 
-import no.fint.model.relation.FintResource;
+import no.fint.event.model.*;
+
 import no.fint.relations.FintRelationsMediaType;
+import no.fint.relations.FintResources;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.util.UriComponentsBuilder;
+
+import java.net.UnknownHostException;
+import java.net.URI;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import no.fint.model.utdanning.elev.Undervisningsforhold;
+import javax.naming.NameNotFoundException;
+
+import no.fint.model.resource.utdanning.elev.UndervisningsforholdResource;
 import no.fint.model.utdanning.elev.ElevActions;
 
 @Slf4j
@@ -37,10 +51,19 @@ public class UndervisningsforholdController {
     private FintAuditService fintAuditService;
 
     @Autowired
-    private UndervisningsforholdAssembler assembler;
+    private UndervisningsforholdLinker linker;
 
     @Autowired
     private ConsumerProps props;
+
+    @Autowired
+    private StatusCache statusCache;
+
+    @Autowired
+    private ConsumerEventUtil consumerEventUtil;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @GetMapping("/last-updated")
     public Map<String, String> getLastUpdated(@RequestHeader(name = HeaderConstants.ORG_ID, required = false) String orgId) {
@@ -68,7 +91,7 @@ public class UndervisningsforholdController {
     }
 
     @GetMapping
-    public ResponseEntity getUndervisningsforhold(
+    public FintResources getUndervisningsforhold(
             @RequestHeader(name = HeaderConstants.ORG_ID, required = false) String orgId,
             @RequestHeader(name = HeaderConstants.CLIENT, required = false) String client,
             @RequestParam(required = false) Long sinceTimeStamp) {
@@ -78,14 +101,14 @@ public class UndervisningsforholdController {
         if (client == null) {
             client = props.getDefaultClient();
         }
-        log.info("OrgId: {}, Client: {}", orgId, client);
+        log.debug("OrgId: {}, Client: {}", orgId, client);
 
         Event event = new Event(orgId, Constants.COMPONENT, ElevActions.GET_ALL_UNDERVISNINGSFORHOLD, client);
         fintAuditService.audit(event);
 
         fintAuditService.audit(event, Status.CACHE);
 
-        List<FintResource<Undervisningsforhold>> undervisningsforhold;
+        List<UndervisningsforholdResource> undervisningsforhold;
         if (sinceTimeStamp == null) {
             undervisningsforhold = cacheService.getAll(orgId);
         } else {
@@ -94,12 +117,13 @@ public class UndervisningsforholdController {
 
         fintAuditService.audit(event, Status.CACHE_RESPONSE, Status.SENT_TO_CLIENT);
 
-        return assembler.resources(undervisningsforhold);
+        return linker.toResources(undervisningsforhold);
     }
 
 
-    @GetMapping("/systemid/{id}")
-    public ResponseEntity getUndervisningsforholdBySystemId(@PathVariable String id,
+    @GetMapping("/systemid/{id:.+}")
+    public UndervisningsforholdResource getUndervisningsforholdBySystemId(
+            @PathVariable String id,
             @RequestHeader(name = HeaderConstants.ORG_ID, required = false) String orgId,
             @RequestHeader(name = HeaderConstants.CLIENT, required = false) String client) {
         if (props.isOverrideOrgId() || orgId == null) {
@@ -108,24 +132,56 @@ public class UndervisningsforholdController {
         if (client == null) {
             client = props.getDefaultClient();
         }
-        log.info("SystemId: {}, OrgId: {}, Client: {}", id, orgId, client);
+        log.debug("SystemId: {}, OrgId: {}, Client: {}", id, orgId, client);
 
         Event event = new Event(orgId, Constants.COMPONENT, ElevActions.GET_UNDERVISNINGSFORHOLD, client);
+        event.setQuery("systemid/" + id);
         fintAuditService.audit(event);
 
         fintAuditService.audit(event, Status.CACHE);
 
-        Optional<FintResource<Undervisningsforhold>> undervisningsforhold = cacheService.getUndervisningsforholdBySystemId(orgId, id);
+        Optional<UndervisningsforholdResource> undervisningsforhold = cacheService.getUndervisningsforholdBySystemId(orgId, id);
 
         fintAuditService.audit(event, Status.CACHE_RESPONSE, Status.SENT_TO_CLIENT);
 
-        if (undervisningsforhold.isPresent()) {
-            return assembler.resource(undervisningsforhold.get());
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+        return undervisningsforhold.map(linker::toResource).orElseThrow(() -> new EntityNotFoundException(id));
     }
 
-    
+
+
+
+    //
+    // Exception handlers
+    //
+    @ExceptionHandler(UpdateEntityMismatchException.class)
+    public ResponseEntity handleUpdateEntityMismatch(Exception e) {
+        return ResponseEntity.badRequest().body(e);
+    }
+
+    @ExceptionHandler(EntityNotFoundException.class)
+    public ResponseEntity handleEntityNotFound(Exception e) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e);
+    }
+
+    @ExceptionHandler(CreateEntityMismatchException.class)
+    public ResponseEntity handleCreateEntityMismatch(Exception e) {
+        return ResponseEntity.badRequest().body(e);
+    }
+
+    @ExceptionHandler(EntityFoundException.class)
+    public ResponseEntity handleEntityFound(Exception e) {
+        return ResponseEntity.status(HttpStatus.FOUND).body(e);
+    }
+
+    @ExceptionHandler(NameNotFoundException.class)
+    public ResponseEntity handleNameNotFound(Exception e) {
+        return ResponseEntity.badRequest().body(e);
+    }
+
+    @ExceptionHandler(UnknownHostException.class)
+    public ResponseEntity handleUnkownHost(Exception e) {
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(e);
+    }
+
 }
 
