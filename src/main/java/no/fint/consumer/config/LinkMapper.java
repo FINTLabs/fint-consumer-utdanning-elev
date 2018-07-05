@@ -5,6 +5,7 @@ import no.fint.consumer.utils.RestEndpoints;
 import java.util.Map;
 
 import com.google.common.collect.ImmutableMap;
+import no.fint.model.felles.Kontaktperson;
 import no.fint.model.felles.Person;
 import no.fint.model.felles.kodeverk.iso.Kjonn;
 import no.fint.model.felles.kodeverk.iso.Landkode;
@@ -33,6 +34,7 @@ public class LinkMapper {
                 .put(Elev.class.getName(), contextPath + RestEndpoints.ELEV)
                 .put(Elevforhold.class.getName(), contextPath + RestEndpoints.ELEVFORHOLD)
                 .put(Kontaktlarergruppe.class.getName(), contextPath + RestEndpoints.KONTAKTLARERGRUPPE)
+				.put(Kontaktperson.class.getName(), contextPath + RestEndpoints.KONTAKTPERSON)
                 .put(Medlemskap.class.getName(), contextPath + RestEndpoints.MEDLEMSKAP)
                 .put(Person.class.getName(), contextPath + RestEndpoints.PERSON)
                 .put(Skoleressurs.class.getName(), contextPath + RestEndpoints.SKOLERESSURS)

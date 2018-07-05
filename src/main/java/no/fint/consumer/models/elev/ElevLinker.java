@@ -11,14 +11,27 @@ public class ElevLinker extends FintLinker<ElevResource> {
         super(ElevResource.class);
     }
 
-
-
-    @Override
-    public String getSelfHref(ElevResource elev) {
-        return createHrefWithId(elev.getElevnummer().getIdentifikatorverdi(), "elevnummer");
+    public void mapLinks(ElevResource resource) {
+        super.mapLinks(resource);
     }
     
-    
+    @Override
+    public String getSelfHref(ElevResource elev) {
+        if (elev.getBrukernavn() != null && elev.getBrukernavn().getIdentifikatorverdi() != null) {
+            return createHrefWithId(elev.getBrukernavn().getIdentifikatorverdi(), "brukernavn");
+        }
+        if (elev.getElevnummer() != null && elev.getElevnummer().getIdentifikatorverdi() != null) {
+            return createHrefWithId(elev.getElevnummer().getIdentifikatorverdi(), "elevnummer");
+        }
+        if (elev.getFeidenavn() != null && elev.getFeidenavn().getIdentifikatorverdi() != null) {
+            return createHrefWithId(elev.getFeidenavn().getIdentifikatorverdi(), "feidenavn");
+        }
+        if (elev.getSystemId() != null && elev.getSystemId().getIdentifikatorverdi() != null) {
+            return createHrefWithId(elev.getSystemId().getIdentifikatorverdi(), "systemid");
+        }
+        
+        return null;
+    }
     
 }
 

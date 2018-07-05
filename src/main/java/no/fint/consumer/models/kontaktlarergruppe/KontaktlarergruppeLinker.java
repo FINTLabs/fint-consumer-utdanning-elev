@@ -11,13 +11,18 @@ public class KontaktlarergruppeLinker extends FintLinker<KontaktlarergruppeResou
         super(KontaktlarergruppeResource.class);
     }
 
-
-    @Override
-    public String getSelfHref(KontaktlarergruppeResource kontaktlarergruppe) {
-        return createHrefWithId(kontaktlarergruppe.getSystemId().getIdentifikatorverdi(), "systemid");
+    public void mapLinks(KontaktlarergruppeResource resource) {
+        super.mapLinks(resource);
     }
     
-    
+    @Override
+    public String getSelfHref(KontaktlarergruppeResource kontaktlarergruppe) {
+        if (kontaktlarergruppe.getSystemId() != null && kontaktlarergruppe.getSystemId().getIdentifikatorverdi() != null) {
+            return createHrefWithId(kontaktlarergruppe.getSystemId().getIdentifikatorverdi(), "systemid");
+        }
+        
+        return null;
+    }
     
 }
 

@@ -11,14 +11,21 @@ public class SkoleressursLinker extends FintLinker<SkoleressursResource> {
         super(SkoleressursResource.class);
     }
 
-
-
-    @Override
-    public String getSelfHref(SkoleressursResource skoleressurs) {
-        return createHrefWithId(skoleressurs.getSystemId().getIdentifikatorverdi(), "systemid");
+    public void mapLinks(SkoleressursResource resource) {
+        super.mapLinks(resource);
     }
     
-    
+    @Override
+    public String getSelfHref(SkoleressursResource skoleressurs) {
+        if (skoleressurs.getFeidenavn() != null && skoleressurs.getFeidenavn().getIdentifikatorverdi() != null) {
+            return createHrefWithId(skoleressurs.getFeidenavn().getIdentifikatorverdi(), "feidenavn");
+        }
+        if (skoleressurs.getSystemId() != null && skoleressurs.getSystemId().getIdentifikatorverdi() != null) {
+            return createHrefWithId(skoleressurs.getSystemId().getIdentifikatorverdi(), "systemid");
+        }
+        
+        return null;
+    }
     
 }
 

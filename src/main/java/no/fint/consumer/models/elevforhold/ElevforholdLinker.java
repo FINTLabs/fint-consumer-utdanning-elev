@@ -11,13 +11,18 @@ public class ElevforholdLinker extends FintLinker<ElevforholdResource> {
         super(ElevforholdResource.class);
     }
 
-
-    @Override
-    public String getSelfHref(ElevforholdResource elevforhold) {
-        return createHrefWithId(elevforhold.getSystemId().getIdentifikatorverdi(), "systemid");
+    public void mapLinks(ElevforholdResource resource) {
+        super.mapLinks(resource);
     }
     
-    
+    @Override
+    public String getSelfHref(ElevforholdResource elevforhold) {
+        if (elevforhold.getSystemId() != null && elevforhold.getSystemId().getIdentifikatorverdi() != null) {
+            return createHrefWithId(elevforhold.getSystemId().getIdentifikatorverdi(), "systemid");
+        }
+        
+        return null;
+    }
     
 }
 

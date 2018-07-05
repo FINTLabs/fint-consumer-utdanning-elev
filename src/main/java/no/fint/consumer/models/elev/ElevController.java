@@ -14,10 +14,7 @@ import no.fint.consumer.exceptions.*;
 import no.fint.consumer.status.StatusCache;
 import no.fint.consumer.utils.RestEndpoints;
 
-import no.fint.event.model.Event;
-import no.fint.event.model.EventResponse;
-import no.fint.event.model.HeaderConstants;
-import no.fint.event.model.Status;
+import no.fint.event.model.*;
 
 import no.fint.relations.FintRelationsMediaType;
 import no.fint.relations.FintResources;
@@ -104,7 +101,7 @@ public class ElevController {
         if (client == null) {
             client = props.getDefaultClient();
         }
-        log.info("OrgId: {}, Client: {}", orgId, client);
+        log.debug("OrgId: {}, Client: {}", orgId, client);
 
         Event event = new Event(orgId, Constants.COMPONENT, ElevActions.GET_ALL_ELEV, client);
         fintAuditService.audit(event);
@@ -125,7 +122,8 @@ public class ElevController {
 
 
     @GetMapping("/brukernavn/{id:.+}")
-    public ElevResource getElevByBrukernavn(@PathVariable String id,
+    public ElevResource getElevByBrukernavn(
+            @PathVariable String id,
             @RequestHeader(name = HeaderConstants.ORG_ID, required = false) String orgId,
             @RequestHeader(name = HeaderConstants.CLIENT, required = false) String client) {
         if (props.isOverrideOrgId() || orgId == null) {
@@ -134,9 +132,10 @@ public class ElevController {
         if (client == null) {
             client = props.getDefaultClient();
         }
-        log.info("Brukernavn: {}, OrgId: {}, Client: {}", id, orgId, client);
+        log.debug("Brukernavn: {}, OrgId: {}, Client: {}", id, orgId, client);
 
         Event event = new Event(orgId, Constants.COMPONENT, ElevActions.GET_ELEV, client);
+        event.setQuery("brukernavn/" + id);
         fintAuditService.audit(event);
 
         fintAuditService.audit(event, Status.CACHE);
@@ -145,11 +144,12 @@ public class ElevController {
 
         fintAuditService.audit(event, Status.CACHE_RESPONSE, Status.SENT_TO_CLIENT);
 
-        return elev.orElseThrow(() -> new EntityNotFoundException(id));
+        return elev.map(linker::toResource).orElseThrow(() -> new EntityNotFoundException(id));
     }
 
     @GetMapping("/elevnummer/{id:.+}")
-    public ElevResource getElevByElevnummer(@PathVariable String id,
+    public ElevResource getElevByElevnummer(
+            @PathVariable String id,
             @RequestHeader(name = HeaderConstants.ORG_ID, required = false) String orgId,
             @RequestHeader(name = HeaderConstants.CLIENT, required = false) String client) {
         if (props.isOverrideOrgId() || orgId == null) {
@@ -158,9 +158,10 @@ public class ElevController {
         if (client == null) {
             client = props.getDefaultClient();
         }
-        log.info("Elevnummer: {}, OrgId: {}, Client: {}", id, orgId, client);
+        log.debug("Elevnummer: {}, OrgId: {}, Client: {}", id, orgId, client);
 
         Event event = new Event(orgId, Constants.COMPONENT, ElevActions.GET_ELEV, client);
+        event.setQuery("elevnummer/" + id);
         fintAuditService.audit(event);
 
         fintAuditService.audit(event, Status.CACHE);
@@ -169,11 +170,12 @@ public class ElevController {
 
         fintAuditService.audit(event, Status.CACHE_RESPONSE, Status.SENT_TO_CLIENT);
 
-        return elev.orElseThrow(() -> new EntityNotFoundException(id));
+        return elev.map(linker::toResource).orElseThrow(() -> new EntityNotFoundException(id));
     }
 
     @GetMapping("/feidenavn/{id:.+}")
-    public ElevResource getElevByFeidenavn(@PathVariable String id,
+    public ElevResource getElevByFeidenavn(
+            @PathVariable String id,
             @RequestHeader(name = HeaderConstants.ORG_ID, required = false) String orgId,
             @RequestHeader(name = HeaderConstants.CLIENT, required = false) String client) {
         if (props.isOverrideOrgId() || orgId == null) {
@@ -182,9 +184,10 @@ public class ElevController {
         if (client == null) {
             client = props.getDefaultClient();
         }
-        log.info("Feidenavn: {}, OrgId: {}, Client: {}", id, orgId, client);
+        log.debug("Feidenavn: {}, OrgId: {}, Client: {}", id, orgId, client);
 
         Event event = new Event(orgId, Constants.COMPONENT, ElevActions.GET_ELEV, client);
+        event.setQuery("feidenavn/" + id);
         fintAuditService.audit(event);
 
         fintAuditService.audit(event, Status.CACHE);
@@ -193,11 +196,12 @@ public class ElevController {
 
         fintAuditService.audit(event, Status.CACHE_RESPONSE, Status.SENT_TO_CLIENT);
 
-        return elev.orElseThrow(() -> new EntityNotFoundException(id));
+        return elev.map(linker::toResource).orElseThrow(() -> new EntityNotFoundException(id));
     }
 
     @GetMapping("/systemid/{id:.+}")
-    public ElevResource getElevBySystemId(@PathVariable String id,
+    public ElevResource getElevBySystemId(
+            @PathVariable String id,
             @RequestHeader(name = HeaderConstants.ORG_ID, required = false) String orgId,
             @RequestHeader(name = HeaderConstants.CLIENT, required = false) String client) {
         if (props.isOverrideOrgId() || orgId == null) {
@@ -206,9 +210,10 @@ public class ElevController {
         if (client == null) {
             client = props.getDefaultClient();
         }
-        log.info("SystemId: {}, OrgId: {}, Client: {}", id, orgId, client);
+        log.debug("SystemId: {}, OrgId: {}, Client: {}", id, orgId, client);
 
         Event event = new Event(orgId, Constants.COMPONENT, ElevActions.GET_ELEV, client);
+        event.setQuery("systemid/" + id);
         fintAuditService.audit(event);
 
         fintAuditService.audit(event, Status.CACHE);
@@ -217,16 +222,17 @@ public class ElevController {
 
         fintAuditService.audit(event, Status.CACHE_RESPONSE, Status.SENT_TO_CLIENT);
 
-        return elev.orElseThrow(() -> new EntityNotFoundException(id));
+        return elev.map(linker::toResource).orElseThrow(() -> new EntityNotFoundException(id));
     }
 
 
 
     @GetMapping("/status/{id}")
-    public ResponseEntity getStatus(@PathVariable String id,
-                                    @RequestHeader(HeaderConstants.ORG_ID) String orgId,
-                                    @RequestHeader(HeaderConstants.CLIENT) String client) {
-        log.info("/status/{} for {} from {}", id, orgId, client);
+    public ResponseEntity getStatus(
+            @PathVariable String id,
+            @RequestHeader(HeaderConstants.ORG_ID) String orgId,
+            @RequestHeader(HeaderConstants.CLIENT) String client) {
+        log.debug("/status/{} for {} from {}", id, orgId, client);
         if (!statusCache.containsKey(id)) {
             return ResponseEntity.notFound().build();
         }
@@ -243,6 +249,7 @@ public class ElevController {
         switch (event.getResponseStatus()) {
             case ACCEPTED:
                 URI location = UriComponentsBuilder.fromUriString(linker.getSelfHref(result.get(0))).build().toUri();
+                fintAuditService.audit(event, Status.SENT_TO_CLIENT);
                 return ResponseEntity.status(HttpStatus.SEE_OTHER).location(location).build();
             case ERROR:
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(event.getResponse());
@@ -258,12 +265,19 @@ public class ElevController {
     public ResponseEntity postElev(
             @RequestHeader(name = HeaderConstants.ORG_ID) String orgId,
             @RequestHeader(name = HeaderConstants.CLIENT) String client,
-            @RequestBody ElevResource body
+            @RequestBody ElevResource body,
+            @RequestParam(name = "validate", required = false) boolean validate
     ) {
-        log.info("postElev, OrgId: {}, Client: {}", orgId, client);
+        log.debug("postElev, Validate: {}, OrgId: {}, Client: {}", validate, orgId, client);
         log.trace("Body: {}", body);
+        linker.mapLinks(body);
         Event event = new Event(orgId, Constants.COMPONENT, ElevActions.UPDATE_ELEV, client);
         event.addObject(objectMapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS).convertValue(body, Map.class));
+        event.setOperation(Operation.CREATE);
+        if (validate) {
+            event.setQuery("VALIDATE");
+            event.setOperation(Operation.VALIDATE);
+        }
         fintAuditService.audit(event);
 
         consumerEventUtil.send(event);
@@ -275,18 +289,20 @@ public class ElevController {
     }
 
   
-    @PutMapping("/elevnummer/{id}")
-    public ResponseEntity putElevByElevnummer(
+    @PutMapping("/brukernavn/{id:.+}")
+    public ResponseEntity putElevByBrukernavn(
             @PathVariable String id,
             @RequestHeader(name = HeaderConstants.ORG_ID) String orgId,
             @RequestHeader(name = HeaderConstants.CLIENT) String client,
             @RequestBody ElevResource body
     ) {
-        log.info("putElevByElevnummer {}, OrgId: {}, Client: {}", id, orgId, client);
+        log.debug("putElevByBrukernavn {}, OrgId: {}, Client: {}", id, orgId, client);
         log.trace("Body: {}", body);
+        linker.mapLinks(body);
         Event event = new Event(orgId, Constants.COMPONENT, ElevActions.UPDATE_ELEV, client);
-        event.setQuery("elevnummer/" + id);
+        event.setQuery("brukernavn/" + id);
         event.addObject(objectMapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS).convertValue(body, Map.class));
+        event.setOperation(Operation.UPDATE);
         fintAuditService.audit(event);
 
         consumerEventUtil.send(event);
@@ -296,7 +312,79 @@ public class ElevController {
         URI location = UriComponentsBuilder.fromUriString(linker.self()).path("status/{id}").buildAndExpand(event.getCorrId()).toUri();
         return ResponseEntity.status(HttpStatus.ACCEPTED).location(location).build();
     }
-    
+  
+    @PutMapping("/elevnummer/{id:.+}")
+    public ResponseEntity putElevByElevnummer(
+            @PathVariable String id,
+            @RequestHeader(name = HeaderConstants.ORG_ID) String orgId,
+            @RequestHeader(name = HeaderConstants.CLIENT) String client,
+            @RequestBody ElevResource body
+    ) {
+        log.debug("putElevByElevnummer {}, OrgId: {}, Client: {}", id, orgId, client);
+        log.trace("Body: {}", body);
+        linker.mapLinks(body);
+        Event event = new Event(orgId, Constants.COMPONENT, ElevActions.UPDATE_ELEV, client);
+        event.setQuery("elevnummer/" + id);
+        event.addObject(objectMapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS).convertValue(body, Map.class));
+        event.setOperation(Operation.UPDATE);
+        fintAuditService.audit(event);
+
+        consumerEventUtil.send(event);
+
+        statusCache.put(event.getCorrId(), event);
+
+        URI location = UriComponentsBuilder.fromUriString(linker.self()).path("status/{id}").buildAndExpand(event.getCorrId()).toUri();
+        return ResponseEntity.status(HttpStatus.ACCEPTED).location(location).build();
+    }
+  
+    @PutMapping("/feidenavn/{id:.+}")
+    public ResponseEntity putElevByFeidenavn(
+            @PathVariable String id,
+            @RequestHeader(name = HeaderConstants.ORG_ID) String orgId,
+            @RequestHeader(name = HeaderConstants.CLIENT) String client,
+            @RequestBody ElevResource body
+    ) {
+        log.debug("putElevByFeidenavn {}, OrgId: {}, Client: {}", id, orgId, client);
+        log.trace("Body: {}", body);
+        linker.mapLinks(body);
+        Event event = new Event(orgId, Constants.COMPONENT, ElevActions.UPDATE_ELEV, client);
+        event.setQuery("feidenavn/" + id);
+        event.addObject(objectMapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS).convertValue(body, Map.class));
+        event.setOperation(Operation.UPDATE);
+        fintAuditService.audit(event);
+
+        consumerEventUtil.send(event);
+
+        statusCache.put(event.getCorrId(), event);
+
+        URI location = UriComponentsBuilder.fromUriString(linker.self()).path("status/{id}").buildAndExpand(event.getCorrId()).toUri();
+        return ResponseEntity.status(HttpStatus.ACCEPTED).location(location).build();
+    }
+  
+    @PutMapping("/systemid/{id:.+}")
+    public ResponseEntity putElevBySystemId(
+            @PathVariable String id,
+            @RequestHeader(name = HeaderConstants.ORG_ID) String orgId,
+            @RequestHeader(name = HeaderConstants.CLIENT) String client,
+            @RequestBody ElevResource body
+    ) {
+        log.debug("putElevBySystemId {}, OrgId: {}, Client: {}", id, orgId, client);
+        log.trace("Body: {}", body);
+        linker.mapLinks(body);
+        Event event = new Event(orgId, Constants.COMPONENT, ElevActions.UPDATE_ELEV, client);
+        event.setQuery("systemid/" + id);
+        event.addObject(objectMapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS).convertValue(body, Map.class));
+        event.setOperation(Operation.UPDATE);
+        fintAuditService.audit(event);
+
+        consumerEventUtil.send(event);
+
+        statusCache.put(event.getCorrId(), event);
+
+        URI location = UriComponentsBuilder.fromUriString(linker.self()).path("status/{id}").buildAndExpand(event.getCorrId()).toUri();
+        return ResponseEntity.status(HttpStatus.ACCEPTED).location(location).build();
+    }
+  
 
     //
     // Exception handlers

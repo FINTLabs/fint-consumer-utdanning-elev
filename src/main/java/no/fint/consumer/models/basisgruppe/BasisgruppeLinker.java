@@ -11,13 +11,18 @@ public class BasisgruppeLinker extends FintLinker<BasisgruppeResource> {
         super(BasisgruppeResource.class);
     }
 
-
-    @Override
-    public String getSelfHref(BasisgruppeResource basisgruppe) {
-        return createHrefWithId(basisgruppe.getSystemId().getIdentifikatorverdi(), "systemid");
+    public void mapLinks(BasisgruppeResource resource) {
+        super.mapLinks(resource);
     }
     
-    
+    @Override
+    public String getSelfHref(BasisgruppeResource basisgruppe) {
+        if (basisgruppe.getSystemId() != null && basisgruppe.getSystemId().getIdentifikatorverdi() != null) {
+            return createHrefWithId(basisgruppe.getSystemId().getIdentifikatorverdi(), "systemid");
+        }
+        
+        return null;
+    }
     
 }
 

@@ -14,10 +14,7 @@ import no.fint.consumer.exceptions.*;
 import no.fint.consumer.status.StatusCache;
 import no.fint.consumer.utils.RestEndpoints;
 
-import no.fint.event.model.Event;
-import no.fint.event.model.EventResponse;
-import no.fint.event.model.HeaderConstants;
-import no.fint.event.model.Status;
+import no.fint.event.model.*;
 
 import no.fint.relations.FintRelationsMediaType;
 import no.fint.relations.FintResources;
@@ -104,7 +101,7 @@ public class KontaktlarergruppeController {
         if (client == null) {
             client = props.getDefaultClient();
         }
-        log.info("OrgId: {}, Client: {}", orgId, client);
+        log.debug("OrgId: {}, Client: {}", orgId, client);
 
         Event event = new Event(orgId, Constants.COMPONENT, ElevActions.GET_ALL_KONTAKTLARERGRUPPE, client);
         fintAuditService.audit(event);
@@ -125,7 +122,8 @@ public class KontaktlarergruppeController {
 
 
     @GetMapping("/systemid/{id:.+}")
-    public KontaktlarergruppeResource getKontaktlarergruppeBySystemId(@PathVariable String id,
+    public KontaktlarergruppeResource getKontaktlarergruppeBySystemId(
+            @PathVariable String id,
             @RequestHeader(name = HeaderConstants.ORG_ID, required = false) String orgId,
             @RequestHeader(name = HeaderConstants.CLIENT, required = false) String client) {
         if (props.isOverrideOrgId() || orgId == null) {
@@ -134,9 +132,10 @@ public class KontaktlarergruppeController {
         if (client == null) {
             client = props.getDefaultClient();
         }
-        log.info("SystemId: {}, OrgId: {}, Client: {}", id, orgId, client);
+        log.debug("SystemId: {}, OrgId: {}, Client: {}", id, orgId, client);
 
         Event event = new Event(orgId, Constants.COMPONENT, ElevActions.GET_KONTAKTLARERGRUPPE, client);
+        event.setQuery("systemid/" + id);
         fintAuditService.audit(event);
 
         fintAuditService.audit(event, Status.CACHE);
@@ -145,7 +144,7 @@ public class KontaktlarergruppeController {
 
         fintAuditService.audit(event, Status.CACHE_RESPONSE, Status.SENT_TO_CLIENT);
 
-        return kontaktlarergruppe.orElseThrow(() -> new EntityNotFoundException(id));
+        return kontaktlarergruppe.map(linker::toResource).orElseThrow(() -> new EntityNotFoundException(id));
     }
 
 

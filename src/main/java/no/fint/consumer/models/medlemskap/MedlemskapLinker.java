@@ -11,13 +11,18 @@ public class MedlemskapLinker extends FintLinker<MedlemskapResource> {
         super(MedlemskapResource.class);
     }
 
-
-    @Override
-    public String getSelfHref(MedlemskapResource medlemskap) {
-        return createHrefWithId(medlemskap.getSystemId().getIdentifikatorverdi(), "systemid");
+    public void mapLinks(MedlemskapResource resource) {
+        super.mapLinks(resource);
     }
     
-    
+    @Override
+    public String getSelfHref(MedlemskapResource medlemskap) {
+        if (medlemskap.getSystemId() != null && medlemskap.getSystemId().getIdentifikatorverdi() != null) {
+            return createHrefWithId(medlemskap.getSystemId().getIdentifikatorverdi(), "systemid");
+        }
+        
+        return null;
+    }
     
 }
 

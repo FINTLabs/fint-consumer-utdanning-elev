@@ -11,13 +11,18 @@ public class UndervisningsforholdLinker extends FintLinker<UndervisningsforholdR
         super(UndervisningsforholdResource.class);
     }
 
-
-    @Override
-    public String getSelfHref(UndervisningsforholdResource undervisningsforhold) {
-        return createHrefWithId(undervisningsforhold.getSystemId().getIdentifikatorverdi(), "systemid");
+    public void mapLinks(UndervisningsforholdResource resource) {
+        super.mapLinks(resource);
     }
     
-    
+    @Override
+    public String getSelfHref(UndervisningsforholdResource undervisningsforhold) {
+        if (undervisningsforhold.getSystemId() != null && undervisningsforhold.getSystemId().getIdentifikatorverdi() != null) {
+            return createHrefWithId(undervisningsforhold.getSystemId().getIdentifikatorverdi(), "systemid");
+        }
+        
+        return null;
+    }
     
 }
 

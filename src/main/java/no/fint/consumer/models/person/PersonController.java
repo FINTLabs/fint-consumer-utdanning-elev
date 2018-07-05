@@ -14,10 +14,7 @@ import no.fint.consumer.exceptions.*;
 import no.fint.consumer.status.StatusCache;
 import no.fint.consumer.utils.RestEndpoints;
 
-import no.fint.event.model.Event;
-import no.fint.event.model.EventResponse;
-import no.fint.event.model.HeaderConstants;
-import no.fint.event.model.Status;
+import no.fint.event.model.*;
 
 import no.fint.relations.FintRelationsMediaType;
 import no.fint.relations.FintResources;
@@ -104,7 +101,7 @@ public class PersonController {
         if (client == null) {
             client = props.getDefaultClient();
         }
-        log.info("OrgId: {}, Client: {}", orgId, client);
+        log.debug("OrgId: {}, Client: {}", orgId, client);
 
         Event event = new Event(orgId, Constants.COMPONENT, FellesActions.GET_ALL_PERSON, client);
         fintAuditService.audit(event);
@@ -125,7 +122,8 @@ public class PersonController {
 
 
     @GetMapping("/fodselsnummer/{id:.+}")
-    public PersonResource getPersonByFodselsnummer(@PathVariable String id,
+    public PersonResource getPersonByFodselsnummer(
+            @PathVariable String id,
             @RequestHeader(name = HeaderConstants.ORG_ID, required = false) String orgId,
             @RequestHeader(name = HeaderConstants.CLIENT, required = false) String client) {
         if (props.isOverrideOrgId() || orgId == null) {
@@ -134,9 +132,10 @@ public class PersonController {
         if (client == null) {
             client = props.getDefaultClient();
         }
-        log.info("Fodselsnummer: {}, OrgId: {}, Client: {}", id, orgId, client);
+        log.debug("Fodselsnummer: {}, OrgId: {}, Client: {}", id, orgId, client);
 
         Event event = new Event(orgId, Constants.COMPONENT, FellesActions.GET_PERSON, client);
+        event.setQuery("fodselsnummer/" + id);
         fintAuditService.audit(event);
 
         fintAuditService.audit(event, Status.CACHE);
@@ -145,16 +144,17 @@ public class PersonController {
 
         fintAuditService.audit(event, Status.CACHE_RESPONSE, Status.SENT_TO_CLIENT);
 
-        return person.orElseThrow(() -> new EntityNotFoundException(id));
+        return person.map(linker::toResource).orElseThrow(() -> new EntityNotFoundException(id));
     }
 
 
 
     @GetMapping("/status/{id}")
-    public ResponseEntity getStatus(@PathVariable String id,
-                                    @RequestHeader(HeaderConstants.ORG_ID) String orgId,
-                                    @RequestHeader(HeaderConstants.CLIENT) String client) {
-        log.info("/status/{} for {} from {}", id, orgId, client);
+    public ResponseEntity getStatus(
+            @PathVariable String id,
+            @RequestHeader(HeaderConstants.ORG_ID) String orgId,
+            @RequestHeader(HeaderConstants.CLIENT) String client) {
+        log.debug("/status/{} for {} from {}", id, orgId, client);
         if (!statusCache.containsKey(id)) {
             return ResponseEntity.notFound().build();
         }
@@ -171,6 +171,7 @@ public class PersonController {
         switch (event.getResponseStatus()) {
             case ACCEPTED:
                 URI location = UriComponentsBuilder.fromUriString(linker.getSelfHref(result.get(0))).build().toUri();
+                fintAuditService.audit(event, Status.SENT_TO_CLIENT);
                 return ResponseEntity.status(HttpStatus.SEE_OTHER).location(location).build();
             case ERROR:
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(event.getResponse());
@@ -186,12 +187,19 @@ public class PersonController {
     public ResponseEntity postPerson(
             @RequestHeader(name = HeaderConstants.ORG_ID) String orgId,
             @RequestHeader(name = HeaderConstants.CLIENT) String client,
-            @RequestBody PersonResource body
+            @RequestBody PersonResource body,
+            @RequestParam(name = "validate", required = false) boolean validate
     ) {
-        log.info("postPerson, OrgId: {}, Client: {}", orgId, client);
+        log.debug("postPerson, Validate: {}, OrgId: {}, Client: {}", validate, orgId, client);
         log.trace("Body: {}", body);
+        linker.mapLinks(body);
         Event event = new Event(orgId, Constants.COMPONENT, FellesActions.UPDATE_PERSON, client);
         event.addObject(objectMapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS).convertValue(body, Map.class));
+        event.setOperation(Operation.CREATE);
+        if (validate) {
+            event.setQuery("VALIDATE");
+            event.setOperation(Operation.VALIDATE);
+        }
         fintAuditService.audit(event);
 
         consumerEventUtil.send(event);
@@ -203,18 +211,20 @@ public class PersonController {
     }
 
   
-    @PutMapping("/fodselsnummer/{id}")
+    @PutMapping("/fodselsnummer/{id:.+}")
     public ResponseEntity putPersonByFodselsnummer(
             @PathVariable String id,
             @RequestHeader(name = HeaderConstants.ORG_ID) String orgId,
             @RequestHeader(name = HeaderConstants.CLIENT) String client,
             @RequestBody PersonResource body
     ) {
-        log.info("putPersonByFodselsnummer {}, OrgId: {}, Client: {}", id, orgId, client);
+        log.debug("putPersonByFodselsnummer {}, OrgId: {}, Client: {}", id, orgId, client);
         log.trace("Body: {}", body);
+        linker.mapLinks(body);
         Event event = new Event(orgId, Constants.COMPONENT, FellesActions.UPDATE_PERSON, client);
         event.setQuery("fodselsnummer/" + id);
         event.addObject(objectMapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS).convertValue(body, Map.class));
+        event.setOperation(Operation.UPDATE);
         fintAuditService.audit(event);
 
         consumerEventUtil.send(event);
@@ -224,7 +234,7 @@ public class PersonController {
         URI location = UriComponentsBuilder.fromUriString(linker.self()).path("status/{id}").buildAndExpand(event.getCorrId()).toUri();
         return ResponseEntity.status(HttpStatus.ACCEPTED).location(location).build();
     }
-    
+  
 
     //
     // Exception handlers
