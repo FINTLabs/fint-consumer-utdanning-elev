@@ -102,6 +102,7 @@ public class PersonCacheService extends CacheService<PersonResource> {
         } else {
             data = objectMapper.convertValue(event.getData(), javaType);
         }
+        data.stream().map(PersonResource::getNavn).map(PersonController::getPersonnavnAsString).forEach(System.out::println);
         data.forEach(linker::mapLinks);
         if (FellesActions.valueOf(event.getAction()) == FellesActions.UPDATE_PERSON) {
             if (event.getResponseStatus() == ResponseStatus.ACCEPTED || event.getResponseStatus() == ResponseStatus.CONFLICT) {
