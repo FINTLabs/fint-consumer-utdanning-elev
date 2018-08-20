@@ -16,6 +16,7 @@ import no.fint.consumer.utils.RestEndpoints;
 
 import no.fint.event.model.*;
 
+import no.fint.model.felles.kompleksedatatyper.Personnavn;
 import no.fint.relations.FintRelationsMediaType;
 import no.fint.relations.FintResources;
 
@@ -120,6 +121,21 @@ public class PersonController {
         return linker.toResources(person);
     }
 
+    public static String getPersonnavnAsString(Personnavn navn) {
+        if (navn == null) return null;
+        String result = "";
+        if (!org.springframework.util.StringUtils.isEmpty(navn.getEtternavn()))
+            result += navn.getEtternavn();
+        if (!org.springframework.util.StringUtils.isEmpty(navn.getFornavn())) {
+            if (!result.isEmpty())
+                result += ", ";
+            result += navn.getFornavn();
+        }
+        if (!org.springframework.util.StringUtils.isEmpty(navn.getMellomnavn()))
+            result += " " + navn.getMellomnavn();
+        return result;
+    }
+
 
     @GetMapping("/fodselsnummer/{id:.+}")
     public PersonResource getPersonByFodselsnummer(
@@ -141,6 +157,8 @@ public class PersonController {
         fintAuditService.audit(event, Status.CACHE);
 
         Optional<PersonResource> person = cacheService.getPersonByFodselsnummer(orgId, id);
+
+        person.map(PersonResource::getNavn).map(PersonController::getPersonnavnAsString).ifPresent(event::setMessage);
 
         fintAuditService.audit(event, Status.CACHE_RESPONSE, Status.SENT_TO_CLIENT);
 
