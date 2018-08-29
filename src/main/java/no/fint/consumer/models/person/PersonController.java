@@ -4,22 +4,21 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.common.collect.ImmutableMap;
 import lombok.extern.slf4j.Slf4j;
-
 import no.fint.audit.FintAuditService;
-
 import no.fint.consumer.config.Constants;
 import no.fint.consumer.config.ConsumerProps;
 import no.fint.consumer.event.ConsumerEventUtil;
-import no.fint.consumer.exceptions.*;
+import no.fint.consumer.exceptions.CreateEntityMismatchException;
+import no.fint.consumer.exceptions.EntityFoundException;
+import no.fint.consumer.exceptions.EntityNotFoundException;
+import no.fint.consumer.exceptions.UpdateEntityMismatchException;
 import no.fint.consumer.status.StatusCache;
 import no.fint.consumer.utils.RestEndpoints;
-
 import no.fint.event.model.*;
-
-import no.fint.model.felles.kompleksedatatyper.Personnavn;
+import no.fint.model.felles.FellesActions;
+import no.fint.model.resource.felles.PersonResource;
 import no.fint.relations.FintRelationsMediaType;
 import no.fint.relations.FintResources;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -27,17 +26,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.net.UnknownHostException;
+import javax.naming.NameNotFoundException;
 import java.net.URI;
-
+import java.net.UnknownHostException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-
-import javax.naming.NameNotFoundException;
-
-import no.fint.model.resource.felles.PersonResource;
-import no.fint.model.felles.FellesActions;
 
 @Slf4j
 @CrossOrigin
@@ -121,21 +115,6 @@ public class PersonController {
         return linker.toResources(person);
     }
 
-    public static String getPersonnavnAsString(Personnavn navn) {
-        if (navn == null) return null;
-        String result = "";
-        if (!org.springframework.util.StringUtils.isEmpty(navn.getEtternavn()))
-            result += navn.getEtternavn();
-        if (!org.springframework.util.StringUtils.isEmpty(navn.getFornavn())) {
-            if (!result.isEmpty())
-                result += ", ";
-            result += navn.getFornavn();
-        }
-        if (!org.springframework.util.StringUtils.isEmpty(navn.getMellomnavn()))
-            result += " " + navn.getMellomnavn();
-        return result;
-    }
-
 
     @GetMapping("/fodselsnummer/{id:.+}")
     public PersonResource getPersonByFodselsnummer(
@@ -157,8 +136,6 @@ public class PersonController {
         fintAuditService.audit(event, Status.CACHE);
 
         Optional<PersonResource> person = cacheService.getPersonByFodselsnummer(orgId, id);
-
-        person.map(PersonResource::getNavn).map(PersonController::getPersonnavnAsString).ifPresent(event::setMessage);
 
         fintAuditService.audit(event, Status.CACHE_RESPONSE, Status.SENT_TO_CLIENT);
 
