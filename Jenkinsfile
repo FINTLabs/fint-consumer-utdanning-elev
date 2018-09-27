@@ -15,18 +15,27 @@ pipeline {
                 branch 'master'
             }
             steps {
-                sh "docker tag ${GIT_COMMIT} dtr.rogfk.no/fint-beta/consumer-utdanning-elev:${VERSION}"
-                withDockerRegistry([credentialsId: 'dtr-rogfk-no', url: 'https://dtr.rogfk.no']) {
-                    sh "docker push 'dtr.rogfk.no/fint-beta/consumer-utdanning-elev:${VERSION}'"
+                sh "docker tag ${GIT_COMMIT} dtr.fintlabs.no/beta/consumer-utdanning-elev:${VERSION}"
+                withDockerRegistry([credentialsId: 'dtr-fintlabs-no', url: 'https://dtr.fintlabs.no']) {
+                    sh "docker push 'dtr.fintlabs.no/beta/consumer-utdanning-elev:${VERSION}'"
+                }
+            }
+        }
+        stage('Publish Tag') {
+            when { buildingTag() }
+            steps {
+                sh "docker tag ${GIT_COMMIT} dtr.fintlabs.no/beta/consumer-utdanning-elev:${TAG_NAME}"
+                withDockerRegistry([credentialsId: 'dtr-fintlabs-no', url: 'https://dtr.fintlabs.no']) {
+                    sh "docker push 'dtr.fintlabs.no/beta/consumer-utdanning-elev:${TAG_NAME}'"
                 }
             }
         }
         stage('Publish PR') {
             when { changeRequest() }
             steps {
-                sh "docker tag ${GIT_COMMIT} dtr.rogfk.no/fint-beta/consumer-utdanning-elev:${BRANCH_NAME}"
-                withDockerRegistry([credentialsId: 'dtr-rogfk-no', url: 'https://dtr.rogfk.no']) {
-                    sh "docker push 'dtr.rogfk.no/fint-beta/consumer-utdanning-elev:${BRANCH_NAME}'"
+                sh "docker tag ${GIT_COMMIT} dtr.fintlabs.no/beta/consumer-utdanning-elev:${BRANCH_NAME}"
+                withDockerRegistry([credentialsId: 'dtr-fintlabs-no', url: 'https://dtr.fintlabs.no']) {
+                    sh "docker push 'dtr.fintlabs.no/beta/consumer-utdanning-elev:${BRANCH_NAME}'"
                 }
             }
         }

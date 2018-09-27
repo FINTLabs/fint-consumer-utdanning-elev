@@ -3,18 +3,18 @@ package no.fint.consumer.models.person;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+
 import lombok.extern.slf4j.Slf4j;
+
 import no.fint.cache.CacheService;
 import no.fint.consumer.config.Constants;
 import no.fint.consumer.config.ConsumerProps;
 import no.fint.consumer.event.ConsumerEventUtil;
 import no.fint.event.model.Event;
 import no.fint.event.model.ResponseStatus;
-import no.fint.model.felles.FellesActions;
-import no.fint.model.felles.Person;
 import no.fint.model.felles.kompleksedatatyper.Identifikator;
-import no.fint.model.resource.felles.PersonResource;
 import no.fint.relations.FintResourceCompatibility;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -24,6 +24,10 @@ import javax.annotation.PostConstruct;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+
+import no.fint.model.felles.Person;
+import no.fint.model.resource.felles.PersonResource;
+import no.fint.model.felles.FellesActions;
 
 @Slf4j
 @Service

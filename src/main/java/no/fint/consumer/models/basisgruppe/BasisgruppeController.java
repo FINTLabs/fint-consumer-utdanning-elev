@@ -3,6 +3,7 @@ package no.fint.consumer.models.basisgruppe;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.common.collect.ImmutableMap;
+import io.swagger.annotations.Api;
 import lombok.extern.slf4j.Slf4j;
 
 import no.fint.audit.FintAuditService;
@@ -17,7 +18,6 @@ import no.fint.consumer.utils.RestEndpoints;
 import no.fint.event.model.*;
 
 import no.fint.relations.FintRelationsMediaType;
-import no.fint.relations.FintResources;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -36,12 +36,14 @@ import java.util.Optional;
 import javax.naming.NameNotFoundException;
 
 import no.fint.model.resource.utdanning.elev.BasisgruppeResource;
+import no.fint.model.resource.utdanning.elev.BasisgruppeResources;
 import no.fint.model.utdanning.elev.ElevActions;
 
 @Slf4j
+@Api(tags = {"Basisgruppe"})
 @CrossOrigin
 @RestController
-@RequestMapping(value = RestEndpoints.BASISGRUPPE, produces = {FintRelationsMediaType.APPLICATION_HAL_JSON_VALUE, MediaType.APPLICATION_JSON_UTF8_VALUE})
+@RequestMapping(name = "Basisgruppe", value = RestEndpoints.BASISGRUPPE, produces = {FintRelationsMediaType.APPLICATION_HAL_JSON_VALUE, MediaType.APPLICATION_JSON_UTF8_VALUE})
 public class BasisgruppeController {
 
     @Autowired
@@ -91,7 +93,7 @@ public class BasisgruppeController {
     }
 
     @GetMapping
-    public FintResources getBasisgruppe(
+    public BasisgruppeResources getBasisgruppe(
             @RequestHeader(name = HeaderConstants.ORG_ID, required = false) String orgId,
             @RequestHeader(name = HeaderConstants.CLIENT, required = false) String client,
             @RequestParam(required = false) Long sinceTimeStamp) {

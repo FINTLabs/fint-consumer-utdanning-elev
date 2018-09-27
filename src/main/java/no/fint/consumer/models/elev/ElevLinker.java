@@ -1,8 +1,16 @@
 package no.fint.consumer.models.elev;
 
+import no.fint.model.resource.Link;
 import no.fint.model.resource.utdanning.elev.ElevResource;
+import no.fint.model.resource.utdanning.elev.ElevResources;
 import no.fint.relations.FintLinker;
 import org.springframework.stereotype.Component;
+
+import java.util.Collection;
+
+import static java.util.Objects.isNull;
+import static org.springframework.util.StringUtils.isEmpty;
+
 
 @Component
 public class ElevLinker extends FintLinker<ElevResource> {
@@ -14,19 +22,27 @@ public class ElevLinker extends FintLinker<ElevResource> {
     public void mapLinks(ElevResource resource) {
         super.mapLinks(resource);
     }
-    
+
+    @Override
+    public ElevResources toResources(Collection<ElevResource> collection) {
+        ElevResources resources = new ElevResources();
+        collection.stream().map(this::toResource).forEach(resources::addResource);
+        resources.addSelf(Link.with(self()));
+        return resources;
+    }
+
     @Override
     public String getSelfHref(ElevResource elev) {
-        if (elev.getBrukernavn() != null && elev.getBrukernavn().getIdentifikatorverdi() != null) {
+        if (!isNull(elev.getBrukernavn()) && !isEmpty(elev.getBrukernavn().getIdentifikatorverdi())) {
             return createHrefWithId(elev.getBrukernavn().getIdentifikatorverdi(), "brukernavn");
         }
-        if (elev.getElevnummer() != null && elev.getElevnummer().getIdentifikatorverdi() != null) {
+        if (!isNull(elev.getElevnummer()) && !isEmpty(elev.getElevnummer().getIdentifikatorverdi())) {
             return createHrefWithId(elev.getElevnummer().getIdentifikatorverdi(), "elevnummer");
         }
-        if (elev.getFeidenavn() != null && elev.getFeidenavn().getIdentifikatorverdi() != null) {
+        if (!isNull(elev.getFeidenavn()) && !isEmpty(elev.getFeidenavn().getIdentifikatorverdi())) {
             return createHrefWithId(elev.getFeidenavn().getIdentifikatorverdi(), "feidenavn");
         }
-        if (elev.getSystemId() != null && elev.getSystemId().getIdentifikatorverdi() != null) {
+        if (!isNull(elev.getSystemId()) && !isEmpty(elev.getSystemId().getIdentifikatorverdi())) {
             return createHrefWithId(elev.getSystemId().getIdentifikatorverdi(), "systemid");
         }
         

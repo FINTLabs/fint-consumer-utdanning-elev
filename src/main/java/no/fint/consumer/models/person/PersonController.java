@@ -3,22 +3,22 @@ package no.fint.consumer.models.person;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.common.collect.ImmutableMap;
+import io.swagger.annotations.Api;
 import lombok.extern.slf4j.Slf4j;
+
 import no.fint.audit.FintAuditService;
+
 import no.fint.consumer.config.Constants;
 import no.fint.consumer.config.ConsumerProps;
 import no.fint.consumer.event.ConsumerEventUtil;
-import no.fint.consumer.exceptions.CreateEntityMismatchException;
-import no.fint.consumer.exceptions.EntityFoundException;
-import no.fint.consumer.exceptions.EntityNotFoundException;
-import no.fint.consumer.exceptions.UpdateEntityMismatchException;
+import no.fint.consumer.exceptions.*;
 import no.fint.consumer.status.StatusCache;
 import no.fint.consumer.utils.RestEndpoints;
+
 import no.fint.event.model.*;
-import no.fint.model.felles.FellesActions;
-import no.fint.model.resource.felles.PersonResource;
+
 import no.fint.relations.FintRelationsMediaType;
-import no.fint.relations.FintResources;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -26,17 +26,24 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import javax.naming.NameNotFoundException;
-import java.net.URI;
 import java.net.UnknownHostException;
+import java.net.URI;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import javax.naming.NameNotFoundException;
+
+import no.fint.model.resource.felles.PersonResource;
+import no.fint.model.resource.felles.PersonResources;
+import no.fint.model.felles.FellesActions;
+
 @Slf4j
+@Api(tags = {"Person"})
 @CrossOrigin
 @RestController
-@RequestMapping(value = RestEndpoints.PERSON, produces = {FintRelationsMediaType.APPLICATION_HAL_JSON_VALUE, MediaType.APPLICATION_JSON_UTF8_VALUE})
+@RequestMapping(name = "Person", value = RestEndpoints.PERSON, produces = {FintRelationsMediaType.APPLICATION_HAL_JSON_VALUE, MediaType.APPLICATION_JSON_UTF8_VALUE})
 public class PersonController {
 
     @Autowired
@@ -86,7 +93,7 @@ public class PersonController {
     }
 
     @GetMapping
-    public FintResources getPerson(
+    public PersonResources getPerson(
             @RequestHeader(name = HeaderConstants.ORG_ID, required = false) String orgId,
             @RequestHeader(name = HeaderConstants.CLIENT, required = false) String client,
             @RequestParam(required = false) Long sinceTimeStamp) {
@@ -165,14 +172,22 @@ public class PersonController {
         List<PersonResource> result = objectMapper.convertValue(event.getData(), objectMapper.getTypeFactory().constructCollectionType(List.class, PersonResource.class));
         switch (event.getResponseStatus()) {
             case ACCEPTED:
+                if (event.getOperation() == Operation.VALIDATE) {
+                    fintAuditService.audit(event, Status.SENT_TO_CLIENT);
+                    return ResponseEntity.ok(event.getResponse());
+                }
                 URI location = UriComponentsBuilder.fromUriString(linker.getSelfHref(result.get(0))).build().toUri();
+                event.setMessage(location.toString());
                 fintAuditService.audit(event, Status.SENT_TO_CLIENT);
                 return ResponseEntity.status(HttpStatus.SEE_OTHER).location(location).build();
             case ERROR:
+                fintAuditService.audit(event, Status.SENT_TO_CLIENT);
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(event.getResponse());
             case CONFLICT:
+                fintAuditService.audit(event, Status.SENT_TO_CLIENT);
                 return ResponseEntity.status(HttpStatus.CONFLICT).body(linker.toResources(result));
             case REJECTED:
+                fintAuditService.audit(event, Status.SENT_TO_CLIENT);
                 return ResponseEntity.badRequest().body(event.getResponse());
         }
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(event.getResponse());
