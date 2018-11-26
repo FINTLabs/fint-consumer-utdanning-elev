@@ -7,6 +7,7 @@ import no.fint.relations.FintLinker;
 import org.springframework.stereotype.Component;
 
 import java.util.Collection;
+import java.util.stream.IntStream;
 
 import static java.util.Objects.isNull;
 import static org.springframework.util.StringUtils.isEmpty;
@@ -47,6 +48,23 @@ public class ElevLinker extends FintLinker<ElevResource> {
         }
         
         return null;
+    }
+
+    public int[] hashCodes(ElevResource elev) {
+        IntStream.Builder builder = IntStream.builder();
+        if (!isNull(elev.getBrukernavn()) && !isEmpty(elev.getBrukernavn().getIdentifikatorverdi())) {
+            builder.add(elev.getBrukernavn().getIdentifikatorverdi().hashCode());
+        }
+        if (!isNull(elev.getElevnummer()) && !isEmpty(elev.getElevnummer().getIdentifikatorverdi())) {
+            builder.add(elev.getElevnummer().getIdentifikatorverdi().hashCode());
+        }
+        if (!isNull(elev.getFeidenavn()) && !isEmpty(elev.getFeidenavn().getIdentifikatorverdi())) {
+            builder.add(elev.getFeidenavn().getIdentifikatorverdi().hashCode());
+        }
+        if (!isNull(elev.getSystemId()) && !isEmpty(elev.getSystemId().getIdentifikatorverdi())) {
+            builder.add(elev.getSystemId().getIdentifikatorverdi().hashCode());
+        }
+        return builder.build().toArray();
     }
     
 }
