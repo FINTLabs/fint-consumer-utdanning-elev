@@ -50,7 +50,7 @@ public class ElevLinker extends FintLinker<ElevResource> {
         return null;
     }
 
-    public int[] hashCodes(ElevResource elev) {
+    int[] hashCodes(ElevResource elev) {
         IntStream.Builder builder = IntStream.builder();
         if (!isNull(elev.getBrukernavn()) && !isEmpty(elev.getBrukernavn().getIdentifikatorverdi())) {
             builder.add(elev.getBrukernavn().getIdentifikatorverdi().hashCode());

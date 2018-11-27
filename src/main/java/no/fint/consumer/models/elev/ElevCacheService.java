@@ -112,7 +112,8 @@ public class ElevCacheService extends CacheService<ElevResource> {
     }
 
     public Optional<ElevResource> getElevBySystemId(String orgId, String systemId) {
-        return getOne(orgId, (resource) -> Optional
+        return getOne(orgId, systemId.hashCode(),
+                (resource) -> Optional
                 .ofNullable(resource)
                 .map(ElevResource::getSystemId)
                 .map(Identifikator::getIdentifikatorverdi)
