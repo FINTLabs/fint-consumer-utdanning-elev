@@ -73,19 +73,20 @@ public class ElevCacheService extends CacheService<ElevResource> {
     }
 
     public void rebuildCache(String orgId) {
-        flush(orgId);
-        populateCache(orgId);
-    }
+		flush(orgId);
+		populateCache(orgId);
+	}
 
     private void populateCache(String orgId) {
-        log.info("Populating Elev cache for {}", orgId);
+		log.info("Populating Elev cache for {}", orgId);
         Event event = new Event(orgId, Constants.COMPONENT, ElevActions.GET_ALL_ELEV, Constants.CACHE_SERVICE);
         consumerEventUtil.send(event);
     }
 
 
     public Optional<ElevResource> getElevByBrukernavn(String orgId, String brukernavn) {
-        return getOne(orgId, (resource) -> Optional
+        return getOne(orgId, brukernavn.hashCode(),
+            (resource) -> Optional
                 .ofNullable(resource)
                 .map(ElevResource::getBrukernavn)
                 .map(Identifikator::getIdentifikatorverdi)
@@ -94,7 +95,8 @@ public class ElevCacheService extends CacheService<ElevResource> {
     }
 
     public Optional<ElevResource> getElevByElevnummer(String orgId, String elevnummer) {
-        return getOne(orgId, (resource) -> Optional
+        return getOne(orgId, elevnummer.hashCode(),
+            (resource) -> Optional
                 .ofNullable(resource)
                 .map(ElevResource::getElevnummer)
                 .map(Identifikator::getIdentifikatorverdi)
@@ -103,7 +105,8 @@ public class ElevCacheService extends CacheService<ElevResource> {
     }
 
     public Optional<ElevResource> getElevByFeidenavn(String orgId, String feidenavn) {
-        return getOne(orgId, (resource) -> Optional
+        return getOne(orgId, feidenavn.hashCode(),
+            (resource) -> Optional
                 .ofNullable(resource)
                 .map(ElevResource::getFeidenavn)
                 .map(Identifikator::getIdentifikatorverdi)
@@ -113,7 +116,7 @@ public class ElevCacheService extends CacheService<ElevResource> {
 
     public Optional<ElevResource> getElevBySystemId(String orgId, String systemId) {
         return getOne(orgId, systemId.hashCode(),
-                (resource) -> Optional
+            (resource) -> Optional
                 .ofNullable(resource)
                 .map(ElevResource::getSystemId)
                 .map(Identifikator::getIdentifikatorverdi)
@@ -122,7 +125,7 @@ public class ElevCacheService extends CacheService<ElevResource> {
     }
 
 
-    @Override
+	@Override
     public void onAction(Event event) {
         List<ElevResource> data;
         if (checkFintResourceCompatibility && fintResourceCompatibility.isFintResourceData(event.getData())) {

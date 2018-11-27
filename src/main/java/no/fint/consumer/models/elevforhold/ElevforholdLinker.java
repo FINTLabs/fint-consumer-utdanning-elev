@@ -7,6 +7,7 @@ import no.fint.relations.FintLinker;
 import org.springframework.stereotype.Component;
 
 import java.util.Collection;
+import java.util.stream.IntStream;
 
 import static java.util.Objects.isNull;
 import static org.springframework.util.StringUtils.isEmpty;
@@ -39,6 +40,15 @@ public class ElevforholdLinker extends FintLinker<ElevforholdResource> {
         
         return null;
     }
-    
+
+    int[] hashCodes(ElevforholdResource elevforhold) {
+        IntStream.Builder builder = IntStream.builder();
+        if (!isNull(elevforhold.getSystemId()) && !isEmpty(elevforhold.getSystemId().getIdentifikatorverdi())) {
+            builder.add(elevforhold.getSystemId().getIdentifikatorverdi().hashCode());
+        }
+        
+        return builder.build().toArray();
+    }
+
 }
 

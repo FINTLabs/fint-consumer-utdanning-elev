@@ -64,8 +64,9 @@ public class ElevLinker extends FintLinker<ElevResource> {
         if (!isNull(elev.getSystemId()) && !isEmpty(elev.getSystemId().getIdentifikatorverdi())) {
             builder.add(elev.getSystemId().getIdentifikatorverdi().hashCode());
         }
+        
         return builder.build().toArray();
     }
-    
+
 }
 

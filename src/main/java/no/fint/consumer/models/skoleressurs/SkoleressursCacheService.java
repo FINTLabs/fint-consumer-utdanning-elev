@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import lombok.extern.slf4j.Slf4j;
 
 import no.fint.cache.CacheService;
+import no.fint.cache.model.CacheObject;
 import no.fint.consumer.config.Constants;
 import no.fint.consumer.config.ConsumerProps;
 import no.fint.consumer.event.ConsumerEventUtil;
@@ -23,6 +24,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.PostConstruct;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import no.fint.model.utdanning.elev.Skoleressurs;
 import no.fint.model.resource.utdanning.elev.SkoleressursResource;
@@ -83,7 +85,8 @@ public class SkoleressursCacheService extends CacheService<SkoleressursResource>
 
 
     public Optional<SkoleressursResource> getSkoleressursByFeidenavn(String orgId, String feidenavn) {
-        return getOne(orgId, (resource) -> Optional
+        return getOne(orgId, feidenavn.hashCode(),
+            (resource) -> Optional
                 .ofNullable(resource)
                 .map(SkoleressursResource::getFeidenavn)
                 .map(Identifikator::getIdentifikatorverdi)
@@ -92,7 +95,8 @@ public class SkoleressursCacheService extends CacheService<SkoleressursResource>
     }
 
     public Optional<SkoleressursResource> getSkoleressursBySystemId(String orgId, String systemId) {
-        return getOne(orgId, (resource) -> Optional
+        return getOne(orgId, systemId.hashCode(),
+            (resource) -> Optional
                 .ofNullable(resource)
                 .map(SkoleressursResource::getSystemId)
                 .map(Identifikator::getIdentifikatorverdi)
@@ -119,8 +123,12 @@ public class SkoleressursCacheService extends CacheService<SkoleressursResource>
                 log.debug("Ignoring payload for {} with response status {}", event.getOrgId(), event.getResponseStatus());
             }
         } else {
-            update(event.getOrgId(), data);
-            log.info("Updated cache for {} with {} elements", event.getOrgId(), data.size());
+            List<CacheObject<SkoleressursResource>> cacheObjects = data
+                    .stream()
+                    .map(i -> new CacheObject<>(i, linker.hashCodes(i)))
+                    .collect(Collectors.toList());
+            updateCache(event.getOrgId(), cacheObjects);
+            log.info("Updated cache for {} with {} cache objects", event.getOrgId(), cacheObjects.size());
         }
     }
 }

@@ -7,6 +7,7 @@ import no.fint.relations.FintLinker;
 import org.springframework.stereotype.Component;
 
 import java.util.Collection;
+import java.util.stream.IntStream;
 
 import static java.util.Objects.isNull;
 import static org.springframework.util.StringUtils.isEmpty;
@@ -39,6 +40,15 @@ public class BasisgruppeLinker extends FintLinker<BasisgruppeResource> {
         
         return null;
     }
-    
+
+    int[] hashCodes(BasisgruppeResource basisgruppe) {
+        IntStream.Builder builder = IntStream.builder();
+        if (!isNull(basisgruppe.getSystemId()) && !isEmpty(basisgruppe.getSystemId().getIdentifikatorverdi())) {
+            builder.add(basisgruppe.getSystemId().getIdentifikatorverdi().hashCode());
+        }
+        
+        return builder.build().toArray();
+    }
+
 }
 
