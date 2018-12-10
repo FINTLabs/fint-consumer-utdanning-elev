@@ -8,4 +8,4 @@ FROM openjdk:8-jre-alpine
 COPY --from=builder /home/gradle/build/deps/external/*.jar /data/
 COPY --from=builder /home/gradle/build/deps/fint/*.jar /data/
 COPY --from=builder /home/gradle/build/libs/fint-consumer-utdanning-elev-*.jar /data/fint-consumer-utdanning-elev.jar
-CMD ["java", "-Xmx10G", "-XX:+ExitOnOutOfMemoryError", "-jar", "/data/fint-consumer-utdanning-elev.jar"]
+CMD java $JAVA_OPTS -XX:+ExitOnOutOfMemoryError -jar /data/fint-consumer-utdanning-elev.jar

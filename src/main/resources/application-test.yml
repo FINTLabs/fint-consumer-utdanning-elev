@@ -1,6 +1,6 @@
 fint:
   events:
-    orgIds: mock.no
+    orgIds: mock.no,fintlabs.no
     test-mode: true
     queue-endpoint-enabled: true
 
@@ -21,3 +21,7 @@ server:
 endpoints:
   sensitive: false
   enabled: true
+
+logging:
+  level:
+    no.fint.consumer.models.elev: DEBUG
