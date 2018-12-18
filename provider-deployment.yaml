@@ -28,7 +28,7 @@ spec:
       restartPolicy: Always
       containers:
         - name: provider-utdanning-elev
-          image: fintlabs.azurecr.io/provider:PR-25.3
+          image: fintlabs.azurecr.io/provider:PR-25.4
           ports:
             - containerPort: 8080
           readinessProbe:
@@ -44,6 +44,8 @@ spec:
           env:
             - name: TZ
               value: Europe/Oslo
+            - name: JAVA_OPTS
+              value: "-Xmx1536m"
             - name: fint.audit.mongo.databasename
               value: fint-audit-beta
             - name: fint.audit.mongo.connection-string
