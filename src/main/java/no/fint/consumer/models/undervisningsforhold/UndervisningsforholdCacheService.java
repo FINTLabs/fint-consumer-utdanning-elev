@@ -107,8 +107,12 @@ public class UndervisningsforholdCacheService extends CacheService<Undervisnings
         data.forEach(linker::mapLinks);
         if (ElevActions.valueOf(event.getAction()) == ElevActions.UPDATE_UNDERVISNINGSFORHOLD) {
             if (event.getResponseStatus() == ResponseStatus.ACCEPTED || event.getResponseStatus() == ResponseStatus.CONFLICT) {
-                add(event.getOrgId(), data);
-                log.info("Added {} elements to cache for {}", data.size(), event.getOrgId());
+                List<CacheObject<UndervisningsforholdResource>> cacheObjects = data
+                    .stream()
+                    .map(i -> new CacheObject<>(i, linker.hashCodes(i)))
+                    .collect(Collectors.toList());
+                addCache(event.getOrgId(), cacheObjects);
+                log.info("Added {} cache objects to cache for {}", cacheObjects.size(), event.getOrgId());
             } else {
                 log.debug("Ignoring payload for {} with response status {}", event.getOrgId(), event.getResponseStatus());
             }

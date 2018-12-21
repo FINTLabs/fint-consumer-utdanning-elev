@@ -138,11 +138,11 @@ public class ElevCacheService extends CacheService<ElevResource> {
         if (ElevActions.valueOf(event.getAction()) == ElevActions.UPDATE_ELEV) {
             if (event.getResponseStatus() == ResponseStatus.ACCEPTED || event.getResponseStatus() == ResponseStatus.CONFLICT) {
                 List<CacheObject<ElevResource>> cacheObjects = data
-                        .stream()
-                        .map(i -> new CacheObject<>(i, linker.hashCodes(i)))
-                        .collect(Collectors.toList());
+                    .stream()
+                    .map(i -> new CacheObject<>(i, linker.hashCodes(i)))
+                    .collect(Collectors.toList());
                 addCache(event.getOrgId(), cacheObjects);
-                log.info("Added {} cache objects to cache for {}", data.size(), event.getOrgId());
+                log.info("Added {} cache objects to cache for {}", cacheObjects.size(), event.getOrgId());
             } else {
                 log.debug("Ignoring payload for {} with response status {}", event.getOrgId(), event.getResponseStatus());
             }

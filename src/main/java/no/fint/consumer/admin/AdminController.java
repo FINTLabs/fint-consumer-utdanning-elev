@@ -1,8 +1,10 @@
 package no.fint.consumer.admin;
 
+import no.fint.cache.Cache;
 import no.fint.cache.CacheManager;
 import no.fint.cache.utils.CacheUri;
 import no.fint.consumer.config.Constants;
+import no.fint.consumer.config.ConsumerProps;
 import no.fint.consumer.event.ConsumerEventUtil;
 import no.fint.consumer.utils.RestEndpoints;
 import no.fint.event.model.DefaultActions;
@@ -17,7 +19,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collection;
+import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @RestController
@@ -29,6 +33,9 @@ public class AdminController {
 
     @Autowired
     private CacheManager<?> cacheManager;
+
+    @Autowired
+    private ConsumerProps props;
 
     @GetMapping("/health")
     public ResponseEntity healthCheck(@RequestHeader(HeaderConstants.ORG_ID) String orgId,
@@ -55,6 +62,21 @@ public class AdminController {
     @GetMapping("/organisations/{orgId:.+}")
     public Collection<String> getOrganization(@PathVariable String orgId) {
         return cacheManager.getKeys().stream().filter(key -> CacheUri.containsOrgId(key, orgId)).collect(Collectors.toList());
+    }
+
+    @GetMapping("/assets")
+    public Collection<String> getAssets() {
+        return props.getAssets();
+    }
+
+    @GetMapping("/caches")
+    public Map<String, Integer> getCaches() {
+        return cacheManager
+                .getKeys()
+                .stream()
+                .collect(Collectors
+                        .toMap(Function.identity(),
+                                k -> cacheManager.getCache(k).map(Cache::size).orElse(0)));
     }
 
 }

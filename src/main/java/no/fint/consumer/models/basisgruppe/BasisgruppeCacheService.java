@@ -3,7 +3,9 @@ package no.fint.consumer.models.basisgruppe;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+
 import lombok.extern.slf4j.Slf4j;
+
 import no.fint.cache.CacheService;
 import no.fint.cache.model.CacheObject;
 import no.fint.consumer.config.Constants;
@@ -12,10 +14,8 @@ import no.fint.consumer.event.ConsumerEventUtil;
 import no.fint.event.model.Event;
 import no.fint.event.model.ResponseStatus;
 import no.fint.model.felles.kompleksedatatyper.Identifikator;
-import no.fint.model.resource.utdanning.elev.BasisgruppeResource;
-import no.fint.model.utdanning.elev.Basisgruppe;
-import no.fint.model.utdanning.elev.ElevActions;
 import no.fint.relations.FintResourceCompatibility;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -25,6 +25,10 @@ import javax.annotation.PostConstruct;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import no.fint.model.utdanning.elev.Basisgruppe;
+import no.fint.model.resource.utdanning.elev.BasisgruppeResource;
+import no.fint.model.utdanning.elev.ElevActions;
 
 @Slf4j
 @Service
@@ -103,8 +107,12 @@ public class BasisgruppeCacheService extends CacheService<BasisgruppeResource> {
         data.forEach(linker::mapLinks);
         if (ElevActions.valueOf(event.getAction()) == ElevActions.UPDATE_BASISGRUPPE) {
             if (event.getResponseStatus() == ResponseStatus.ACCEPTED || event.getResponseStatus() == ResponseStatus.CONFLICT) {
-                add(event.getOrgId(), data);
-                log.info("Added {} elements to cache for {}", data.size(), event.getOrgId());
+                List<CacheObject<BasisgruppeResource>> cacheObjects = data
+                    .stream()
+                    .map(i -> new CacheObject<>(i, linker.hashCodes(i)))
+                    .collect(Collectors.toList());
+                addCache(event.getOrgId(), cacheObjects);
+                log.info("Added {} cache objects to cache for {}", cacheObjects.size(), event.getOrgId());
             } else {
                 log.debug("Ignoring payload for {} with response status {}", event.getOrgId(), event.getResponseStatus());
             }
