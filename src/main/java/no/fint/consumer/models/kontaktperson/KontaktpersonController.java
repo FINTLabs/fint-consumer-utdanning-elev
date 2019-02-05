@@ -149,8 +149,31 @@ public class KontaktpersonController {
         return kontaktperson.map(linker::toResource).orElseThrow(() -> new EntityNotFoundException(id));
     }
 
+    @DeleteMapping("/systemid/{id:.+}")
+    public ResponseEntity deleteKontaktpersonBySystemId(
+            @PathVariable String id,
+            @RequestHeader(name = HeaderConstants.ORG_ID, required = false) String orgId,
+            @RequestHeader(name = HeaderConstants.CLIENT, required = false) String client) {
+        if (props.isOverrideOrgId() || orgId == null) {
+            orgId = props.getDefaultOrgId();
+        }
+        if (client == null) {
+            client = props.getDefaultClient();
+        }
+        log.debug("SystemId: {}, OrgId: {}, Client: {}", id, orgId, client);
+        KontaktpersonResource kontaktperson = cacheService.getKontaktpersonBySystemId(orgId, id).orElseThrow(() -> new EntityNotFoundException(id));
 
+        Event event = new Event(orgId, Constants.COMPONENT, FellesActions.UPDATE_KONTAKTPERSON, client);
+        event.setQuery("systemid/" + id);
+        event.setOperation(Operation.DELETE);
+        event.addObject(objectMapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS).convertValue(kontaktperson, Map.class));
 
+        fintAuditService.audit(event);
+
+        consumerEventUtil.send(event);
+
+        return ResponseEntity.accepted().build();
+    }
 
     //
     // Exception handlers
