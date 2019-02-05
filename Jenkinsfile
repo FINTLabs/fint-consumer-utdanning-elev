@@ -41,6 +41,10 @@ pipeline {
                 withDockerRegistry([credentialsId: 'fintlabs.azurecr.io', url: 'https://fintlabs.azurecr.io']) {
                     sh "docker push fintlabs.azurecr.io/consumer-utdanning-elev:${BRANCH_NAME}.${BUILD_NUMBER}"
                 }
+                sh "docker tag ${GIT_COMMIT} fintlabs.azurecr.io/consumer-utdanning-elev:${BRANCH_NAME}.${BUILD_NUMBER}"
+                withDockerRegistry([credentialsId: 'fintlabs.azurecr.io', url: 'https://fintlabs.azurecr.io']) {
+                    sh "docker push fintlabs.azurecr.io/consumer-utdanning-elev:${BRANCH_NAME}.${BUILD_NUMBER}"
+                }
             }
         }
     }
