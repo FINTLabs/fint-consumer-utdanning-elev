@@ -268,7 +268,10 @@ public class KontaktpersonController {
 
         consumerEventUtil.send(event);
 
-        return ResponseEntity.accepted().build();
+        statusCache.put(event.getCorrId(), event);
+
+        URI location = UriComponentsBuilder.fromUriString(linker.self()).path("status/{id}").buildAndExpand(event.getCorrId()).toUri();
+        return ResponseEntity.status(HttpStatus.ACCEPTED).location(location).build();
     }
 
     //
