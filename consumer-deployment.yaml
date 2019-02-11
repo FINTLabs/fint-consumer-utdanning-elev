@@ -28,7 +28,7 @@ spec:
       restartPolicy: Always
       containers:
         - name: consumer-utdanning-elev
-          image: fintlabs.azurecr.io/consumer-utdanning-elev:0.8.13-3.1.0
+          image: fintlabs.azurecr.io/consumer-utdanning-elev:PR-4.2
           ports:
             - containerPort: 8080
           readinessProbe:
@@ -44,8 +44,8 @@ spec:
           env:
             - name: TZ
               value: Europe/Oslo
-            - name: JAVA_OPTS
-              value: "-Xmx8G"
+            - name: JAVA_TOOL_OPTIONS
+              value: "-XX:+ExitOnOutOfMemoryError -Xmx8G -verbose:gc"
             - name: fint.audit.mongo.databasename
               value: fint-audit-beta
             - name: fint.audit.mongo.connection-string
