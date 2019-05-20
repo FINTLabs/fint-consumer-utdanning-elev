@@ -68,7 +68,7 @@ spec:
       restartPolicy: Always
       containers:
         - name: consumer-utdanning-elev
-          image: fintlabs.azurecr.io/consumer-utdanning-elev:PR-4.2
+          image: fintlabs.azurecr.io/consumer-utdanning-elev:PR-4.7
           ports:
             - containerPort: 8080
           readinessProbe:
@@ -171,7 +171,7 @@ spec:
           value: "true"
         - name: server.context-path
           value: /utdanning/elev/provider
-        image: fintlabs.azurecr.io/provider:PR-25.8
+        image: fintlabs.azurecr.io/provider:2.1.0
         name: provider-utdanning-elev
         ports:
         - containerPort: 8080
