@@ -97,10 +97,6 @@ afterEvaluate {
     }
 }
 
-task wrapper(type: Wrapper) {
-    gradleVersion = gradleVersion
-}
-
 bootRepackage.enabled = false
 
 bootRun {

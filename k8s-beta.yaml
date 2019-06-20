@@ -1,0 +1,193 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    kompose.cmd: C:\Users\noasgnil\go\bin\kompose.exe convert -d -f .\docker-stack-beta.yml
+    kompose.version: 1.16.0 (HEAD)
+    service.beta.kubernetes.io/azure-load-balancer-internal: "true"
+  labels:
+    fint.role: consumer
+    fint.stack: utdanning-elev
+  name: consumer-utdanning-elev
+spec:
+  ports:
+  - name: "8080"
+    port: 8080
+  selector:
+    fint.role: consumer
+    fint.stack: utdanning-elev
+  type: LoadBalancer
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    kompose.cmd: C:\Users\noasgnil\go\bin\kompose.exe convert -d -f .\docker-stack-beta.yml
+    kompose.version: 1.16.0 (HEAD)
+    service.beta.kubernetes.io/azure-load-balancer-internal: "true"
+  labels:
+    fint.role: provider
+    fint.stack: utdanning-elev
+  name: provider-utdanning-elev
+spec:
+  ports:
+  - name: "8080"
+    port: 8080
+  selector:
+    fint.role: provider
+    fint.stack: utdanning-elev
+  type: LoadBalancer
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: C:\Users\noasgnil\go\bin\kompose.exe convert -d -f .\docker-stack-beta.yml
+    kompose.version: 1.16.0 (HEAD)
+  labels:
+    fint.stack: utdanning-elev
+    fint.role: consumer
+  name: consumer-utdanning-elev
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  selector:
+    matchLabels:
+      fint.stack: utdanning-elev
+      fint.role: consumer
+  template:
+    metadata:
+      labels:
+        fint.stack: utdanning-elev
+        fint.role: consumer
+    spec:
+      restartPolicy: Always
+      containers:
+        - name: consumer-utdanning-elev
+          image: fintlabs.azurecr.io/consumer-utdanning-elev:1.1.0
+          ports:
+            - containerPort: 8080
+          readinessProbe:
+            initialDelaySeconds: 60
+            timeoutSeconds: 30
+            httpGet:
+              port: 8080
+              path: /utdanning/elev/health
+          resources:
+            limits:
+              memory: "10Gi"
+              cpu: "750m"
+          env:
+            - name: TZ
+              value: Europe/Oslo
+            - name: JAVA_TOOL_OPTIONS
+              value: "-XX:+ExitOnOutOfMemoryError -Xmx8G -verbose:gc"
+            - name: fint.audit.mongo.databasename
+              value: fint-audit-beta
+            - name: fint.audit.mongo.connection-string
+              valueFrom:
+                secretKeyRef:
+                  name: fint-audit
+                  key: mongodb
+            - name: fint.cache.manager
+              value: default
+            - name: fint.events.orgIds
+              value: health.fintlabs.no
+            - name: fint.hazelcast.kubernetes.enabled
+              value: "true"
+            - name: fint.hazelcast.kubernetes.namespace
+              value: default
+            - name: fint.hazelcast.kubernetes.labelName
+              value: fint.stack
+            - name: fint.hazelcast.kubernetes.labelValue
+              value: utdanning-elev
+            - name: fint.relations.default-base-url
+              value: https://beta.felleskomponent.no
+            - name: server.context-path
+              value: /utdanning/elev
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    deployment.kubernetes.io/revision: "6"
+    kompose.cmd: C:\Users\noasgnil\go\bin\kompose.exe convert -d -f .\docker-stack-beta.yml
+    kompose.version: 1.16.0 (HEAD)
+  labels:
+    fint.role: provider
+    fint.stack: utdanning-elev
+  name: provider-utdanning-elev
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      fint.role: provider
+      fint.stack: utdanning-elev
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        fint.role: provider
+        fint.stack: utdanning-elev
+    spec:
+      containers:
+      - env:
+        - name: TZ
+          value: Europe/Oslo
+        - name: JAVA_OPTS
+          value: -Xmx1536m
+        - name: fint.audit.mongo.databasename
+          value: fint-audit-beta
+        - name: fint.audit.mongo.connection-string
+          valueFrom:
+            secretKeyRef:
+              key: mongodb
+              name: fint-audit
+        - name: fint.events.orgIds
+          value: health.fintlabs.no
+        - name: fint.hazelcast.kubernetes.enabled
+          value: "true"
+        - name: fint.hazelcast.kubernetes.namespace
+          value: default
+        - name: fint.hazelcast.kubernetes.labelName
+          value: fint.stack
+        - name: fint.hazelcast.kubernetes.labelValue
+          value: utdanning-elev
+        - name: fint.provider.assets.endpoint
+          value: https://admin-beta.fintlabs.no/api/components/assets/utdanning_elev
+        - name: fint.provider.max-number-of-emitters
+          value: "5"
+        - name: fint.provider.sse.heartbeat.enabled
+          value: "true"
+        - name: server.context-path
+          value: /utdanning/elev/provider
+        image: fintlabs.azurecr.io/provider:2.1.0
+        name: provider-utdanning-elev
+        ports:
+        - containerPort: 8080
+          protocol: TCP
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /utdanning/elev/provider/health
+            port: 8080
+            scheme: HTTP
+          initialDelaySeconds: 60
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 30
+        resources:
+          limits:
+            cpu: 500m
+            memory: 2Gi
+      restartPolicy: Always

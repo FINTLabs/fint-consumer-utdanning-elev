@@ -1,6 +1,10 @@
+spring:
+ application:
+  name: fint-consumer-utdanning-elev
+
 fint:
   events:
-    orgIds: mock.no,fintlabs.no
+    orgIds: mock.no
     test-mode: true
     queue-endpoint-enabled: true
 
