@@ -43,7 +43,7 @@ public class LinkMapper {
                 .put("no.fint.model.administrasjon.personal.Arbeidsforhold", "/administrasjon/personal/arbeidsforhold")
                 .put("no.fint.model.administrasjon.personal.Personalressurs", "/administrasjon/personal/personalressurs")
                 .put(Sprak.class.getName(), "/felles/kodeverk/sprak")
-                .put(Landkode.class.getName(), "/felles/kodeverk/land")
+                .put(Landkode.class.getName(), "/felles/kodeverk/landkode")
                 .put(Kjonn.class.getName(), "/felles/kodeverk/kjonn")
                 .put(Fag.class.getName(), "/utdanning/timeplan/fag")
                 .put(Rom.class.getName(), "/utdanning/timeplan/rom")
