@@ -68,12 +68,12 @@ spec:
       restartPolicy: Always
       containers:
         - name: consumer-utdanning-elev
-          image: fintlabs.azurecr.io/consumer-utdanning-elev:PR-4.7
+          image: fintlabs.azurecr.io/consumer-utdanning-elev:1.1.0
           ports:
             - containerPort: 8080
           readinessProbe:
             initialDelaySeconds: 60
-            timeoutSeconds: 5
+            timeoutSeconds: 30
             httpGet:
               port: 8080
               path: /utdanning/elev/health
@@ -185,7 +185,7 @@ spec:
           initialDelaySeconds: 60
           periodSeconds: 10
           successThreshold: 1
-          timeoutSeconds: 5
+          timeoutSeconds: 30
         resources:
           limits:
             cpu: 500m
