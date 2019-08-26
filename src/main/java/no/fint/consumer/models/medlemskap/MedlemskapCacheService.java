@@ -7,7 +7,6 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import lombok.extern.slf4j.Slf4j;
 
 import no.fint.cache.CacheService;
-import no.fint.cache.model.CacheObject;
 import no.fint.consumer.config.Constants;
 import no.fint.consumer.config.ConsumerProps;
 import no.fint.consumer.event.ConsumerEventUtil;
@@ -24,7 +23,6 @@ import org.springframework.stereotype.Service;
 import javax.annotation.PostConstruct;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import no.fint.model.utdanning.elev.Medlemskap;
 import no.fint.model.resource.utdanning.elev.MedlemskapResource;
@@ -77,7 +75,8 @@ public class MedlemskapCacheService extends CacheService<MedlemskapResource> {
 		populateCache(orgId);
 	}
 
-    private void populateCache(String orgId) {
+    @Override
+    public void populateCache(String orgId) {
 		log.info("Populating Medlemskap cache for {}", orgId);
         Event event = new Event(orgId, Constants.COMPONENT, ElevActions.GET_ALL_MEDLEMSKAP, Constants.CACHE_SERVICE);
         consumerEventUtil.send(event);
@@ -85,8 +84,7 @@ public class MedlemskapCacheService extends CacheService<MedlemskapResource> {
 
 
     public Optional<MedlemskapResource> getMedlemskapBySystemId(String orgId, String systemId) {
-        return getOne(orgId, systemId.hashCode(),
-            (resource) -> Optional
+        return getOne(orgId, (resource) -> Optional
                 .ofNullable(resource)
                 .map(MedlemskapResource::getSystemId)
                 .map(Identifikator::getIdentifikatorverdi)
@@ -107,22 +105,14 @@ public class MedlemskapCacheService extends CacheService<MedlemskapResource> {
         data.forEach(linker::mapLinks);
         if (ElevActions.valueOf(event.getAction()) == ElevActions.UPDATE_MEDLEMSKAP) {
             if (event.getResponseStatus() == ResponseStatus.ACCEPTED || event.getResponseStatus() == ResponseStatus.CONFLICT) {
-                List<CacheObject<MedlemskapResource>> cacheObjects = data
-                    .stream()
-                    .map(i -> new CacheObject<>(i, linker.hashCodes(i)))
-                    .collect(Collectors.toList());
-                addCache(event.getOrgId(), cacheObjects);
-                log.info("Added {} cache objects to cache for {}", cacheObjects.size(), event.getOrgId());
+                add(event.getOrgId(), data);
+                log.info("Added {} elements to cache for {}", data.size(), event.getOrgId());
             } else {
                 log.debug("Ignoring payload for {} with response status {}", event.getOrgId(), event.getResponseStatus());
             }
         } else {
-            List<CacheObject<MedlemskapResource>> cacheObjects = data
-                    .stream()
-                    .map(i -> new CacheObject<>(i, linker.hashCodes(i)))
-                    .collect(Collectors.toList());
-            updateCache(event.getOrgId(), cacheObjects);
-            log.info("Updated cache for {} with {} cache objects", event.getOrgId(), cacheObjects.size());
+            update(event.getOrgId(), data);
+            log.info("Updated cache for {} with {} elements", event.getOrgId(), data.size());
         }
     }
 }

@@ -84,14 +84,6 @@ public class MedlemskapController {
         return ImmutableMap.of("size", cacheService.getAll(orgId).size());
     }
 
-    @PostMapping("/cache/rebuild")
-    public void rebuildCache(@RequestHeader(name = HeaderConstants.ORG_ID, required = false) String orgId) {
-        if (props.isOverrideOrgId() || orgId == null) {
-            orgId = props.getDefaultOrgId();
-        }
-        cacheService.rebuildCache(orgId);
-    }
-
     @GetMapping
     public MedlemskapResources getMedlemskap(
             @RequestHeader(name = HeaderConstants.ORG_ID, required = false) String orgId,
