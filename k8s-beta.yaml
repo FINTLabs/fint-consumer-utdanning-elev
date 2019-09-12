@@ -68,7 +68,7 @@ spec:
       restartPolicy: Always
       containers:
         - name: consumer-utdanning-elev
-          image: fintlabs.azurecr.io/consumer-utdanning-elev:1.1.0
+          image: fintlabs.azurecr.io/consumer-utdanning-elev:PR-6.2
           ports:
             - containerPort: 8080
           readinessProbe:
@@ -109,6 +109,8 @@ spec:
               value: https://beta.felleskomponent.no
             - name: server.context-path
               value: /utdanning/elev
+            - name: spring.mvc.logResolvedException
+              value: 'false'
 ---
 apiVersion: apps/v1
 kind: Deployment
