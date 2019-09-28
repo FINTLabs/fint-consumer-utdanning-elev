@@ -68,7 +68,7 @@ spec:
       restartPolicy: Always
       containers:
         - name: consumer-utdanning-elev
-          image: fintlabs.azurecr.io/consumer-utdanning-elev:PR-6.2
+          image: fintlabs.azurecr.io/consumer-utdanning-elev:PR-6.4
           ports:
             - containerPort: 8080
           readinessProbe:
@@ -88,6 +88,7 @@ spec:
               value: "-XX:+ExitOnOutOfMemoryError -Xmx8G -verbose:gc"
             - name: fint.audit.mongo.databasename
               value: fint-audit-beta
+            - {name: fint.audit.mongo.collection, value: auditEvents}
             - name: fint.audit.mongo.connection-string
               valueFrom:
                 secretKeyRef:
@@ -150,6 +151,7 @@ spec:
           value: -Xmx1536m
         - name: fint.audit.mongo.databasename
           value: fint-audit-beta
+        - {name: fint.audit.mongo.collection, value: auditEvents}
         - name: fint.audit.mongo.connection-string
           valueFrom:
             secretKeyRef:
@@ -173,7 +175,7 @@ spec:
           value: "true"
         - name: server.context-path
           value: /utdanning/elev/provider
-        image: fintlabs.azurecr.io/provider:2.1.0
+        image: fintlabs.azurecr.io/provider:PR-32.5
         name: provider-utdanning-elev
         ports:
         - containerPort: 8080
