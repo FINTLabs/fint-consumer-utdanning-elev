@@ -7,29 +7,33 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import lombok.extern.slf4j.Slf4j;
 
 import no.fint.cache.CacheService;
+import no.fint.cache.model.CacheObject;
 import no.fint.consumer.config.Constants;
 import no.fint.consumer.config.ConsumerProps;
 import no.fint.consumer.event.ConsumerEventUtil;
 import no.fint.event.model.Event;
 import no.fint.event.model.ResponseStatus;
-import no.fint.model.felles.kompleksedatatyper.Identifikator;
 import no.fint.relations.FintResourceCompatibility;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import no.fint.model.utdanning.elev.Elev;
 import no.fint.model.resource.utdanning.elev.ElevResource;
 import no.fint.model.utdanning.elev.ElevActions;
+import no.fint.model.felles.kompleksedatatyper.Identifikator;
 
 @Slf4j
 @Service
+@ConditionalOnProperty(name = "fint.consumer.cache.disabled.elev", havingValue = "false", matchIfMissing = true)
 public class ElevCacheService extends CacheService<ElevResource> {
 
     public static final String MODEL = Elev.class.getSimpleName().toLowerCase();
@@ -84,38 +88,42 @@ public class ElevCacheService extends CacheService<ElevResource> {
 
 
     public Optional<ElevResource> getElevByBrukernavn(String orgId, String brukernavn) {
-        return getOne(orgId, (resource) -> Optional
+        return getOne(orgId, brukernavn.hashCode(),
+            (resource) -> Optional
                 .ofNullable(resource)
                 .map(ElevResource::getBrukernavn)
                 .map(Identifikator::getIdentifikatorverdi)
-                .map(_id -> _id.equals(brukernavn))
+                .map(brukernavn::equals)
                 .orElse(false));
     }
 
     public Optional<ElevResource> getElevByElevnummer(String orgId, String elevnummer) {
-        return getOne(orgId, (resource) -> Optional
+        return getOne(orgId, elevnummer.hashCode(),
+            (resource) -> Optional
                 .ofNullable(resource)
                 .map(ElevResource::getElevnummer)
                 .map(Identifikator::getIdentifikatorverdi)
-                .map(_id -> _id.equals(elevnummer))
+                .map(elevnummer::equals)
                 .orElse(false));
     }
 
     public Optional<ElevResource> getElevByFeidenavn(String orgId, String feidenavn) {
-        return getOne(orgId, (resource) -> Optional
+        return getOne(orgId, feidenavn.hashCode(),
+            (resource) -> Optional
                 .ofNullable(resource)
                 .map(ElevResource::getFeidenavn)
                 .map(Identifikator::getIdentifikatorverdi)
-                .map(_id -> _id.equals(feidenavn))
+                .map(feidenavn::equals)
                 .orElse(false));
     }
 
     public Optional<ElevResource> getElevBySystemId(String orgId, String systemId) {
-        return getOne(orgId, (resource) -> Optional
+        return getOne(orgId, systemId.hashCode(),
+            (resource) -> Optional
                 .ofNullable(resource)
                 .map(ElevResource::getSystemId)
                 .map(Identifikator::getIdentifikatorverdi)
-                .map(_id -> _id.equals(systemId))
+                .map(systemId::equals)
                 .orElse(false));
     }
 
@@ -132,14 +140,22 @@ public class ElevCacheService extends CacheService<ElevResource> {
         data.forEach(linker::mapLinks);
         if (ElevActions.valueOf(event.getAction()) == ElevActions.UPDATE_ELEV) {
             if (event.getResponseStatus() == ResponseStatus.ACCEPTED || event.getResponseStatus() == ResponseStatus.CONFLICT) {
-                add(event.getOrgId(), data);
-                log.info("Added {} elements to cache for {}", data.size(), event.getOrgId());
+                List<CacheObject<ElevResource>> cacheObjects = data
+                    .stream()
+                    .map(i -> new CacheObject<>(i, linker.hashCodes(i)))
+                    .collect(Collectors.toList());
+                addCache(event.getOrgId(), cacheObjects);
+                log.info("Added {} cache objects to cache for {}", cacheObjects.size(), event.getOrgId());
             } else {
                 log.debug("Ignoring payload for {} with response status {}", event.getOrgId(), event.getResponseStatus());
             }
         } else {
-            update(event.getOrgId(), data);
-            log.info("Updated cache for {} with {} elements", event.getOrgId(), data.size());
+            List<CacheObject<ElevResource>> cacheObjects = data
+                    .stream()
+                    .map(i -> new CacheObject<>(i, linker.hashCodes(i)))
+                    .collect(Collectors.toList());
+            updateCache(event.getOrgId(), cacheObjects);
+            log.info("Updated cache for {} with {} cache objects", event.getOrgId(), cacheObjects.size());
         }
     }
 }
