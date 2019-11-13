@@ -130,10 +130,10 @@ spec:
         - env:
             - {name: TZ, value: Europe/Oslo}
             - {name: JAVA_TOOL_OPTIONS, value: '-XX:+ExitOnOutOfMemoryError -Xmx3G -verbose:gc'}
-            - {name: fint.audit.mongo.databasename, value: fint-audit}
+            - {name: fint.audit.mongo.databasename, value: fint-audit-beta}
             - name: fint.audit.mongo.connection-string
               valueFrom:
-                secretKeyRef: {key: mongodb, name: fint-audit-beta}
+                secretKeyRef: {key: mongodb, name: fint-audit}
             - {name: fint.events.orgIds, value: health.fintlabs.no}
             - {name: fint.hazelcast.kubernetes.enabled, value: 'true'}
             - {name: fint.hazelcast.kubernetes.namespace, value: default}
