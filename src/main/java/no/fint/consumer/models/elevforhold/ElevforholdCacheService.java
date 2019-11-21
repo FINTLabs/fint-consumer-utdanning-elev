@@ -13,11 +13,11 @@ import no.fint.consumer.config.ConsumerProps;
 import no.fint.consumer.event.ConsumerEventUtil;
 import no.fint.event.model.Event;
 import no.fint.event.model.ResponseStatus;
-import no.fint.model.felles.kompleksedatatyper.Identifikator;
 import no.fint.relations.FintResourceCompatibility;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -29,9 +29,11 @@ import java.util.stream.Collectors;
 import no.fint.model.utdanning.elev.Elevforhold;
 import no.fint.model.resource.utdanning.elev.ElevforholdResource;
 import no.fint.model.utdanning.elev.ElevActions;
+import no.fint.model.felles.kompleksedatatyper.Identifikator;
 
 @Slf4j
 @Service
+@ConditionalOnProperty(name = "fint.consumer.cache.disabled.elevforhold", havingValue = "false", matchIfMissing = true)
 public class ElevforholdCacheService extends CacheService<ElevforholdResource> {
 
     public static final String MODEL = Elevforhold.class.getSimpleName().toLowerCase();
@@ -77,7 +79,8 @@ public class ElevforholdCacheService extends CacheService<ElevforholdResource> {
 		populateCache(orgId);
 	}
 
-    private void populateCache(String orgId) {
+    @Override
+    public void populateCache(String orgId) {
 		log.info("Populating Elevforhold cache for {}", orgId);
         Event event = new Event(orgId, Constants.COMPONENT, ElevActions.GET_ALL_ELEVFORHOLD, Constants.CACHE_SERVICE);
         consumerEventUtil.send(event);
@@ -90,7 +93,7 @@ public class ElevforholdCacheService extends CacheService<ElevforholdResource> {
                 .ofNullable(resource)
                 .map(ElevforholdResource::getSystemId)
                 .map(Identifikator::getIdentifikatorverdi)
-                .map(_id -> _id.equals(systemId))
+                .map(systemId::equals)
                 .orElse(false));
     }
 

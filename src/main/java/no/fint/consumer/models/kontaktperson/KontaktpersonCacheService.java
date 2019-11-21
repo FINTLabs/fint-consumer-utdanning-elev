@@ -13,11 +13,11 @@ import no.fint.consumer.config.ConsumerProps;
 import no.fint.consumer.event.ConsumerEventUtil;
 import no.fint.event.model.Event;
 import no.fint.event.model.ResponseStatus;
-import no.fint.model.felles.kompleksedatatyper.Identifikator;
 import no.fint.relations.FintResourceCompatibility;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -29,9 +29,11 @@ import java.util.stream.Collectors;
 import no.fint.model.felles.Kontaktperson;
 import no.fint.model.resource.felles.KontaktpersonResource;
 import no.fint.model.felles.FellesActions;
+import no.fint.model.felles.kompleksedatatyper.Identifikator;
 
 @Slf4j
 @Service
+@ConditionalOnProperty(name = "fint.consumer.cache.disabled.kontaktperson", havingValue = "false", matchIfMissing = true)
 public class KontaktpersonCacheService extends CacheService<KontaktpersonResource> {
 
     public static final String MODEL = Kontaktperson.class.getSimpleName().toLowerCase();
@@ -77,7 +79,8 @@ public class KontaktpersonCacheService extends CacheService<KontaktpersonResourc
 		populateCache(orgId);
 	}
 
-    private void populateCache(String orgId) {
+    @Override
+    public void populateCache(String orgId) {
 		log.info("Populating Kontaktperson cache for {}", orgId);
         Event event = new Event(orgId, Constants.COMPONENT, FellesActions.GET_ALL_KONTAKTPERSON, Constants.CACHE_SERVICE);
         consumerEventUtil.send(event);
@@ -90,7 +93,7 @@ public class KontaktpersonCacheService extends CacheService<KontaktpersonResourc
                 .ofNullable(resource)
                 .map(KontaktpersonResource::getSystemId)
                 .map(Identifikator::getIdentifikatorverdi)
-                .map(_id -> _id.equals(systemId))
+                .map(systemId::equals)
                 .orElse(false));
     }
 

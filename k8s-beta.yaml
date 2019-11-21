@@ -68,7 +68,7 @@ spec:
       restartPolicy: Always
       containers:
         - name: consumer-utdanning-elev
-          image: fintlabs.azurecr.io/consumer-utdanning-elev:1.1.0
+          image: fintlabs.azurecr.io/consumer-utdanning-elev:PR-6.4
           ports:
             - containerPort: 8080
           readinessProbe:
@@ -88,6 +88,7 @@ spec:
               value: "-XX:+ExitOnOutOfMemoryError -Xmx8G -verbose:gc"
             - name: fint.audit.mongo.databasename
               value: fint-audit-beta
+            - {name: fint.audit.mongo.collection, value: auditEvents}
             - name: fint.audit.mongo.connection-string
               valueFrom:
                 secretKeyRef:
@@ -109,6 +110,8 @@ spec:
               value: https://beta.felleskomponent.no
             - name: server.context-path
               value: /utdanning/elev
+            - name: spring.mvc.logResolvedException
+              value: 'false'
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -131,6 +134,7 @@ spec:
             - {name: TZ, value: Europe/Oslo}
             - {name: JAVA_TOOL_OPTIONS, value: '-XX:+ExitOnOutOfMemoryError -Xmx3G -verbose:gc'}
             - {name: fint.audit.mongo.databasename, value: fint-audit-beta}
+            - {name: fint.audit.mongo.collection, value: auditEvents}
             - name: fint.audit.mongo.connection-string
               valueFrom:
                 secretKeyRef: {key: mongodb, name: fint-audit}
@@ -144,7 +148,7 @@ spec:
             - {name: server.tomcat.max-threads, value: '400'}
             - {name: server.tomcat.max-connections, value: '20000'}
             - {name: fint.provider.assets.endpoint, value: 'https://admin.fintlabs.no/api/components/assets/utdanning_elev'}
-          image: fintlabs.azurecr.io/provider:2.1.0
+          image: fintlabs.azurecr.io/provider:PR-32.5
           name: provider-utdanning-elev
           ports:
             - {containerPort: 8080}

@@ -13,11 +13,11 @@ import no.fint.consumer.config.ConsumerProps;
 import no.fint.consumer.event.ConsumerEventUtil;
 import no.fint.event.model.Event;
 import no.fint.event.model.ResponseStatus;
-import no.fint.model.felles.kompleksedatatyper.Identifikator;
 import no.fint.relations.FintResourceCompatibility;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -29,9 +29,11 @@ import java.util.stream.Collectors;
 import no.fint.model.felles.Person;
 import no.fint.model.resource.felles.PersonResource;
 import no.fint.model.felles.FellesActions;
+import no.fint.model.felles.kompleksedatatyper.Identifikator;
 
 @Slf4j
 @Service
+@ConditionalOnProperty(name = "fint.consumer.cache.disabled.person", havingValue = "false", matchIfMissing = true)
 public class PersonCacheService extends CacheService<PersonResource> {
 
     public static final String MODEL = Person.class.getSimpleName().toLowerCase();
@@ -77,7 +79,8 @@ public class PersonCacheService extends CacheService<PersonResource> {
 		populateCache(orgId);
 	}
 
-    private void populateCache(String orgId) {
+    @Override
+    public void populateCache(String orgId) {
 		log.info("Populating Person cache for {}", orgId);
         Event event = new Event(orgId, Constants.COMPONENT, FellesActions.GET_ALL_PERSON, Constants.CACHE_SERVICE);
         consumerEventUtil.send(event);
@@ -90,7 +93,7 @@ public class PersonCacheService extends CacheService<PersonResource> {
                 .ofNullable(resource)
                 .map(PersonResource::getFodselsnummer)
                 .map(Identifikator::getIdentifikatorverdi)
-                .map(_id -> _id.equals(fodselsnummer))
+                .map(fodselsnummer::equals)
                 .orElse(false));
     }
 

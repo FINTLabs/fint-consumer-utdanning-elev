@@ -13,11 +13,11 @@ import no.fint.consumer.config.ConsumerProps;
 import no.fint.consumer.event.ConsumerEventUtil;
 import no.fint.event.model.Event;
 import no.fint.event.model.ResponseStatus;
-import no.fint.model.felles.kompleksedatatyper.Identifikator;
 import no.fint.relations.FintResourceCompatibility;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -29,9 +29,11 @@ import java.util.stream.Collectors;
 import no.fint.model.utdanning.elev.Elev;
 import no.fint.model.resource.utdanning.elev.ElevResource;
 import no.fint.model.utdanning.elev.ElevActions;
+import no.fint.model.felles.kompleksedatatyper.Identifikator;
 
 @Slf4j
 @Service
+@ConditionalOnProperty(name = "fint.consumer.cache.disabled.elev", havingValue = "false", matchIfMissing = true)
 public class ElevCacheService extends CacheService<ElevResource> {
 
     public static final String MODEL = Elev.class.getSimpleName().toLowerCase();
@@ -77,7 +79,8 @@ public class ElevCacheService extends CacheService<ElevResource> {
 		populateCache(orgId);
 	}
 
-    private void populateCache(String orgId) {
+    @Override
+    public void populateCache(String orgId) {
 		log.info("Populating Elev cache for {}", orgId);
         Event event = new Event(orgId, Constants.COMPONENT, ElevActions.GET_ALL_ELEV, Constants.CACHE_SERVICE);
         consumerEventUtil.send(event);
@@ -90,7 +93,7 @@ public class ElevCacheService extends CacheService<ElevResource> {
                 .ofNullable(resource)
                 .map(ElevResource::getBrukernavn)
                 .map(Identifikator::getIdentifikatorverdi)
-                .map(_id -> _id.equals(brukernavn))
+                .map(brukernavn::equals)
                 .orElse(false));
     }
 
@@ -100,7 +103,7 @@ public class ElevCacheService extends CacheService<ElevResource> {
                 .ofNullable(resource)
                 .map(ElevResource::getElevnummer)
                 .map(Identifikator::getIdentifikatorverdi)
-                .map(_id -> _id.equals(elevnummer))
+                .map(elevnummer::equals)
                 .orElse(false));
     }
 
@@ -110,7 +113,7 @@ public class ElevCacheService extends CacheService<ElevResource> {
                 .ofNullable(resource)
                 .map(ElevResource::getFeidenavn)
                 .map(Identifikator::getIdentifikatorverdi)
-                .map(_id -> _id.equals(feidenavn))
+                .map(feidenavn::equals)
                 .orElse(false));
     }
 
@@ -120,7 +123,7 @@ public class ElevCacheService extends CacheService<ElevResource> {
                 .ofNullable(resource)
                 .map(ElevResource::getSystemId)
                 .map(Identifikator::getIdentifikatorverdi)
-                .map(_id -> _id.equals(systemId))
+                .map(systemId::equals)
                 .orElse(false));
     }
 
