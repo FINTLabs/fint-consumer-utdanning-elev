@@ -59,6 +59,7 @@ spec:
             - {name: fint.hazelcast.kubernetes.labelName, value: fint.stack}
             - {name: fint.hazelcast.kubernetes.labelValue, value: utdanning-elev}
             - {name: fint.relations.default-base-url, value: 'https://beta.felleskomponent.no'}
+            - {name: fint.consumer.cache.disabled.medlemskap, value: 'true'}
             - {name: server.context-path, value: /utdanning/elev}
           image: fintlabs.azurecr.io/consumer-utdanning-elev:3.3.0
           name: consumer-utdanning-elev
