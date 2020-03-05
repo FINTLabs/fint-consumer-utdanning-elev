@@ -17,10 +17,10 @@ import spock.lang.Specification
 @ActiveProfiles("test")
 class ElevControllerSpec extends Specification {
     @LocalServerPort
-    private int port;
+    private int port
 
     @Autowired
-    private TestRestTemplate restTemplate;
+    private TestRestTemplate restTemplate
 
     @Autowired
     private StatusCache statusCache

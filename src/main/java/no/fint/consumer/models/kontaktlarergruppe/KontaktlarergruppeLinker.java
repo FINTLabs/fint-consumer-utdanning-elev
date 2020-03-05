@@ -8,10 +8,10 @@ import org.springframework.stereotype.Component;
 
 import java.util.Collection;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import static java.util.Objects.isNull;
 import static org.springframework.util.StringUtils.isEmpty;
-
 
 @Component
 public class KontaktlarergruppeLinker extends FintLinker<KontaktlarergruppeResource> {
@@ -34,11 +34,17 @@ public class KontaktlarergruppeLinker extends FintLinker<KontaktlarergruppeResou
 
     @Override
     public String getSelfHref(KontaktlarergruppeResource kontaktlarergruppe) {
+        return getAllSelfHrefs(kontaktlarergruppe).findFirst().orElse(null);
+    }
+
+    @Override
+    public Stream<String> getAllSelfHrefs(KontaktlarergruppeResource kontaktlarergruppe) {
+        Stream.Builder<String> builder = Stream.builder();
         if (!isNull(kontaktlarergruppe.getSystemId()) && !isEmpty(kontaktlarergruppe.getSystemId().getIdentifikatorverdi())) {
-            return createHrefWithId(kontaktlarergruppe.getSystemId().getIdentifikatorverdi(), "systemid");
+            builder.add(createHrefWithId(kontaktlarergruppe.getSystemId().getIdentifikatorverdi(), "systemid"));
         }
         
-        return null;
+        return builder.build();
     }
 
     int[] hashCodes(KontaktlarergruppeResource kontaktlarergruppe) {
