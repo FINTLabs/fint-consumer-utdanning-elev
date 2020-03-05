@@ -1,0 +1,112 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations: {service.beta.kubernetes.io/azure-load-balancer-internal: 'true'}
+  labels: {fint.stack: utdanning-elev, fint.role: consumer}
+  name: consumer-utdanning-elev
+spec:
+  type: LoadBalancer
+  ports:
+    - {name: '8080', port: 8080}
+  selector: {fint.stack: utdanning-elev, fint.role: consumer}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations: {service.beta.kubernetes.io/azure-load-balancer-internal: 'true'}
+  labels: {fint.stack: utdanning-elev, fint.role: provider}
+  name: provider-utdanning-elev
+spec:
+  type: LoadBalancer
+  ports:
+    - {name: '8080', port: 8080}
+  selector: {fint.stack: utdanning-elev, fint.role: provider}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels: {fint.stack: utdanning-elev, fint.role: consumer}
+  name: consumer-utdanning-elev
+spec:
+  replicas: 1
+  selector:
+    matchLabels: {fint.stack: utdanning-elev, fint.role: consumer}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate: {maxSurge: 1, maxUnavailable: 0}
+  template:
+    metadata:
+      labels: {fint.stack: utdanning-elev, fint.role: consumer}
+    spec:
+      containers:
+        - name: consumer-utdanning-elev
+          image: fintlabs.azurecr.io/consumer-utdanning-elev:PR-8.5
+          envFrom:
+            - configMapRef:
+                name: fint-environment
+            - secretRef:
+                name: fint-events-azure-eventhub
+          env:
+            - {name: fint.hazelcast.kubernetes.enabled, value: 'true'}
+            - {name: fint.hazelcast.kubernetes.namespace, value: default}
+            - {name: fint.hazelcast.kubernetes.labelName, value: fint.stack}
+            - {name: fint.hazelcast.kubernetes.labelValue, value: utdanning-elev}
+            - {name: fint.cache.packer, value: DEFLATE}
+            - {name: fint.consumer.cache.disabled.medlemskap, value: "true"}
+            - {name: server.context-path, value: /utdanning/elev}
+          ports:
+            - {containerPort: 8080}
+          readinessProbe:
+            httpGet: {path: /utdanning/elev/health, port: 8080}
+            initialDelaySeconds: 60
+            timeoutSeconds: 30
+          resources:
+            requests: {memory: 1Gi, cpu: 250m}
+            limits: {memory: 3Gi, cpu: '2'}
+      restartPolicy: Always
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels: {fint.stack: utdanning-elev, fint.role: provider}
+  name: provider-utdanning-elev
+spec:
+  replicas: 1
+  selector:
+    matchLabels: {fint.stack: utdanning-elev, fint.role: provider}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate: {maxSurge: 1, maxUnavailable: 0}
+  template:
+    metadata:
+      labels: {fint.stack: utdanning-elev, fint.role: provider}
+    spec:
+      containers:
+        - name: provider-utdanning-elev
+          image: fintlabs.azurecr.io/provider:PR-40.5
+          envFrom:
+            - configMapRef:
+                name: fint-environment
+            - secretRef:
+                name: fint-events-azure-eventhub
+          env:
+            - {name: fint.hazelcast.kubernetes.enabled, value: 'true'}
+            - {name: fint.hazelcast.kubernetes.namespace, value: default}
+            - {name: fint.hazelcast.kubernetes.labelName, value: fint.stack}
+            - {name: fint.hazelcast.kubernetes.labelValue, value: utdanning-elev}
+            - {name: fint.provider.assets.endpoint, value: 'https://admin-beta.fintlabs.no/api/components/assets/utdanning_elev'}
+            - {name: fint.provider.max-number-of-emitters, value: '5'}
+            - {name: fint.provider.sse.heartbeat.enabled, value: 'true'}
+            - {name: server.context-path, value: /utdanning/elev/provider}
+            - {name: server.tomcat.max-threads, value: '400'}
+            - {name: server.tomcat.max-connections, value: '30000'}
+          ports:
+            - {containerPort: 8080}
+          readinessProbe:
+            httpGet: {path: /utdanning/elev/provider/health, port: 8080}
+            initialDelaySeconds: 60
+            timeoutSeconds: 30
+          resources:
+            requests: {memory: 1Gi, cpu: 250m}
+            limits: {memory: 3Gi, cpu: 2000m}
+      restartPolicy: Always
