@@ -59,8 +59,12 @@ spec:
             - {name: fint.relations.default-base-url, value: 'https://beta.felleskomponent.no'}
             - {name: management.security.enabled, value: 'false'}
             - {name: server.context-path, value: /utdanning/elev}
-            - {name: spring.mvc.logResolvedException,  value: 'false'}
-          image: fintlabs.azurecr.io/consumer-utdanning-elev:PR-8.1
+          envFrom:
+            - configMapRef:
+                name: fint-environment
+            - secretRef:
+                name: fint-events-azure-eventhub
+          image: fintlabs.azurecr.io/consumer-utdanning-elev:build.20
           name: consumer-utdanning-elev
           ports:
             - {containerPort: 8080}
@@ -113,7 +117,12 @@ spec:
             - {name: management.security.enabled, value: 'false'}
             - {name: server.tomcat.max-threads, value: '400'}
             - {name: server.tomcat.max-connections, value: '30000'}
-          image: fintlabs.azurecr.io/provider:2.2.0
+          envFrom:
+            - configMapRef:
+                name: fint-environment
+            - secretRef:
+                name: fint-events-azure-eventhub
+          image: fintlabs.azurecr.io/provider:2.3.0-alpha-2
           name: provider-utdanning-elev
           ports:
             - {containerPort: 8080}
