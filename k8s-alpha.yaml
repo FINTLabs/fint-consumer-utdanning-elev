@@ -40,7 +40,7 @@ spec:
     spec:
       containers:
         - name: consumer-utdanning-elev
-          image: fintlabs.azurecr.io/consumer-utdanning-elev:PR-8.5
+          image: fintlabs.azurecr.io/consumer-utdanning-elev:PR-8.8
           envFrom:
             - configMapRef:
                 name: fint-environment
