@@ -8,10 +8,10 @@ import org.springframework.stereotype.Component;
 
 import java.util.Collection;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import static java.util.Objects.isNull;
 import static org.springframework.util.StringUtils.isEmpty;
-
 
 @Component
 public class SkoleressursLinker extends FintLinker<SkoleressursResource> {
@@ -34,14 +34,20 @@ public class SkoleressursLinker extends FintLinker<SkoleressursResource> {
 
     @Override
     public String getSelfHref(SkoleressursResource skoleressurs) {
+        return getAllSelfHrefs(skoleressurs).findFirst().orElse(null);
+    }
+
+    @Override
+    public Stream<String> getAllSelfHrefs(SkoleressursResource skoleressurs) {
+        Stream.Builder<String> builder = Stream.builder();
         if (!isNull(skoleressurs.getFeidenavn()) && !isEmpty(skoleressurs.getFeidenavn().getIdentifikatorverdi())) {
-            return createHrefWithId(skoleressurs.getFeidenavn().getIdentifikatorverdi(), "feidenavn");
+            builder.add(createHrefWithId(skoleressurs.getFeidenavn().getIdentifikatorverdi(), "feidenavn"));
         }
         if (!isNull(skoleressurs.getSystemId()) && !isEmpty(skoleressurs.getSystemId().getIdentifikatorverdi())) {
-            return createHrefWithId(skoleressurs.getSystemId().getIdentifikatorverdi(), "systemid");
+            builder.add(createHrefWithId(skoleressurs.getSystemId().getIdentifikatorverdi(), "systemid"));
         }
         
-        return null;
+        return builder.build();
     }
 
     int[] hashCodes(SkoleressursResource skoleressurs) {

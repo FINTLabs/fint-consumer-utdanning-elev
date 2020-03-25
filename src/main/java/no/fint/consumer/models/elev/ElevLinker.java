@@ -8,10 +8,10 @@ import org.springframework.stereotype.Component;
 
 import java.util.Collection;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import static java.util.Objects.isNull;
 import static org.springframework.util.StringUtils.isEmpty;
-
 
 @Component
 public class ElevLinker extends FintLinker<ElevResource> {
@@ -34,20 +34,26 @@ public class ElevLinker extends FintLinker<ElevResource> {
 
     @Override
     public String getSelfHref(ElevResource elev) {
+        return getAllSelfHrefs(elev).findFirst().orElse(null);
+    }
+
+    @Override
+    public Stream<String> getAllSelfHrefs(ElevResource elev) {
+        Stream.Builder<String> builder = Stream.builder();
         if (!isNull(elev.getBrukernavn()) && !isEmpty(elev.getBrukernavn().getIdentifikatorverdi())) {
-            return createHrefWithId(elev.getBrukernavn().getIdentifikatorverdi(), "brukernavn");
+            builder.add(createHrefWithId(elev.getBrukernavn().getIdentifikatorverdi(), "brukernavn"));
         }
         if (!isNull(elev.getElevnummer()) && !isEmpty(elev.getElevnummer().getIdentifikatorverdi())) {
-            return createHrefWithId(elev.getElevnummer().getIdentifikatorverdi(), "elevnummer");
+            builder.add(createHrefWithId(elev.getElevnummer().getIdentifikatorverdi(), "elevnummer"));
         }
         if (!isNull(elev.getFeidenavn()) && !isEmpty(elev.getFeidenavn().getIdentifikatorverdi())) {
-            return createHrefWithId(elev.getFeidenavn().getIdentifikatorverdi(), "feidenavn");
+            builder.add(createHrefWithId(elev.getFeidenavn().getIdentifikatorverdi(), "feidenavn"));
         }
         if (!isNull(elev.getSystemId()) && !isEmpty(elev.getSystemId().getIdentifikatorverdi())) {
-            return createHrefWithId(elev.getSystemId().getIdentifikatorverdi(), "systemid");
+            builder.add(createHrefWithId(elev.getSystemId().getIdentifikatorverdi(), "systemid"));
         }
         
-        return null;
+        return builder.build();
     }
 
     int[] hashCodes(ElevResource elev) {

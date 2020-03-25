@@ -2,12 +2,6 @@ springfox:
   title: '@title@'
   version: '@version@'
 
-fint:
-  consumer:
-    cache:
-      disabled:
-        medlemskap: true
-
 spring:
   mvc:
     logResolvedException: false
