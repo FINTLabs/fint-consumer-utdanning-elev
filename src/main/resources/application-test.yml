@@ -3,29 +3,21 @@ spring:
   name: fint-consumer-utdanning-elev
 
 fint:
-  events:
-    orgIds: mock.no
-    test-mode: true
-    queue-endpoint-enabled: true
+ events:
+  orgIds: mock.no
+  test-mode: true
+  queue-endpoint-enabled: true
 
-  audit:
-    test-mode: true
+ audit:
+  test-mode: true
 
-  relations:
-    force-https: false
-    default-base-url: /
+ relations:
+  force-https: false
+  default-base-url: /
 
-  hazelcast:
-    members: localhost
+ hazelcast:
+  members: localhost
 
 server:
-  context-path: ""
-  port: 8080
-
-endpoints:
-  sensitive: false
-  enabled: true
-
-logging:
-  level:
-    no.fint.consumer.models.elev: DEBUG
+ context-path: ""
+ port: 8080
