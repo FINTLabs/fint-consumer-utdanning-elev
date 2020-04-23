@@ -8,10 +8,10 @@ import org.springframework.stereotype.Component;
 
 import java.util.Collection;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import static java.util.Objects.isNull;
 import static org.springframework.util.StringUtils.isEmpty;
-
 
 @Component
 public class BasisgruppeLinker extends FintLinker<BasisgruppeResource> {
@@ -34,11 +34,17 @@ public class BasisgruppeLinker extends FintLinker<BasisgruppeResource> {
 
     @Override
     public String getSelfHref(BasisgruppeResource basisgruppe) {
+        return getAllSelfHrefs(basisgruppe).findFirst().orElse(null);
+    }
+
+    @Override
+    public Stream<String> getAllSelfHrefs(BasisgruppeResource basisgruppe) {
+        Stream.Builder<String> builder = Stream.builder();
         if (!isNull(basisgruppe.getSystemId()) && !isEmpty(basisgruppe.getSystemId().getIdentifikatorverdi())) {
-            return createHrefWithId(basisgruppe.getSystemId().getIdentifikatorverdi(), "systemid");
+            builder.add(createHrefWithId(basisgruppe.getSystemId().getIdentifikatorverdi(), "systemid"));
         }
         
-        return null;
+        return builder.build();
     }
 
     int[] hashCodes(BasisgruppeResource basisgruppe) {
