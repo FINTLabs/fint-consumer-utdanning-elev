@@ -8,10 +8,7 @@ import no.fint.model.felles.kodeverk.iso.Kjonn;
 import no.fint.model.felles.kodeverk.iso.Landkode;
 import no.fint.model.felles.kodeverk.iso.Sprak;
 import no.fint.model.utdanning.elev.*;
-import no.fint.model.utdanning.kodeverk.Elevkategori;
-import no.fint.model.utdanning.kodeverk.Fravarstype;
-import no.fint.model.utdanning.kodeverk.Karakterskala;
-import no.fint.model.utdanning.kodeverk.Skoleeiertype;
+import no.fint.model.utdanning.kodeverk.*;
 import no.fint.model.utdanning.timeplan.Fag;
 import no.fint.model.utdanning.timeplan.Rom;
 import no.fint.model.utdanning.timeplan.Time;
@@ -32,9 +29,11 @@ public class LinkMapper {
     public static Map<String, String> linkMapper(String contextPath) {
         return ImmutableMap.<String, String>builder()
                 .put(Basisgruppe.class.getName(), contextPath + RestEndpoints.BASISGRUPPE)
+                .put(Basisgruppemedlemskap.class.getName(), contextPath + RestEndpoints.BASISGRUPPEMEDLEMSKAP)
                 .put(Elev.class.getName(), contextPath + RestEndpoints.ELEV)
                 .put(Elevforhold.class.getName(), contextPath + RestEndpoints.ELEVFORHOLD)
                 .put(Kontaktlarergruppe.class.getName(), contextPath + RestEndpoints.KONTAKTLARERGRUPPE)
+                .put(Kontaktlarergruppemedlemskap.class.getName(), contextPath + RestEndpoints.KONTAKTLARERGRUPPEMEDLEMSKAP)
                 .put(Kontaktperson.class.getName(), contextPath + RestEndpoints.KONTAKTPERSON)
                 .put(Medlemskap.class.getName(), contextPath + RestEndpoints.MEDLEMSKAP)
                 .put(Person.class.getName(), contextPath + RestEndpoints.PERSON)
@@ -54,6 +53,8 @@ public class LinkMapper {
                 .put(Fravarstype.class.getName(), "/utdanning/kodeverk/fravarstype")
                 .put(Karakterskala.class.getName(), "/utdanning/kodeverk/karakterskala")
                 .put(Skoleeiertype.class.getName(), "/utdanning/kodeverk/skoleeiertype")
+                .put(Skolear.class.getName(), "/utdanning/kodeverk/skolear")
+                .put(Termin.class.getName(), "/utdanning/kodeverk/termin")
                 .put(Arstrinn.class.getName(), "/utdanning/utdanningsprogram/arstrinn")
                 .put(Programomrade.class.getName(), "/utdanning/utdanningsprogram/programomrade")
                 .put(Skole.class.getName(), "/utdanning/utdanningsprogram/skole")
