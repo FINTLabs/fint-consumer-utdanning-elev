@@ -1,6 +1,5 @@
 package no.fint.consumer.models.elevforhold;
 
-import no.fint.model.resource.Link;
 import no.fint.model.resource.utdanning.elev.ElevforholdResource;
 import no.fint.model.resource.utdanning.elev.ElevforholdResources;
 import no.fint.relations.FintLinker;
@@ -26,9 +25,14 @@ public class ElevforholdLinker extends FintLinker<ElevforholdResource> {
 
     @Override
     public ElevforholdResources toResources(Collection<ElevforholdResource> collection) {
+        return toResources(collection.stream(), 0, 0, collection.size());
+    }
+
+    @Override
+    public ElevforholdResources toResources(Stream<ElevforholdResource> stream, int offset, int size, int totalItems) {
         ElevforholdResources resources = new ElevforholdResources();
-        collection.stream().map(this::toResource).forEach(resources::addResource);
-        resources.addSelf(Link.with(self()));
+        stream.map(this::toResource).forEach(resources::addResource);
+        addPagination(resources, offset, size, totalItems);
         return resources;
     }
 
