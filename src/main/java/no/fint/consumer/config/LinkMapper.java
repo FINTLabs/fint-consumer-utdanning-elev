@@ -1,10 +1,12 @@
 package no.fint.consumer.config;
 
-import no.fint.consumer.utils.RestEndpoints;
-import java.util.Map;
 import com.google.common.collect.ImmutableMap;
-
+import no.fint.consumer.utils.RestEndpoints;
+import no.fint.model.felles.Kontaktperson;
+import no.fint.model.felles.Person;
 import no.fint.model.utdanning.elev.*;
+
+import java.util.Map;
 
 public class LinkMapper {
 
