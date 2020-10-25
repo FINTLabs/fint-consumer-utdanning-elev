@@ -1,6 +1,5 @@
 package no.fint.consumer.models.basisgruppemedlemskap;
 
-import no.fint.model.resource.Link;
 import no.fint.model.resource.utdanning.elev.BasisgruppemedlemskapResource;
 import no.fint.model.resource.utdanning.elev.BasisgruppemedlemskapResources;
 import no.fint.relations.FintLinker;
@@ -26,9 +25,14 @@ public class BasisgruppemedlemskapLinker extends FintLinker<Basisgruppemedlemska
 
     @Override
     public BasisgruppemedlemskapResources toResources(Collection<BasisgruppemedlemskapResource> collection) {
+        return toResources(collection.stream(), 0, 0, collection.size());
+    }
+
+    @Override
+    public BasisgruppemedlemskapResources toResources(Stream<BasisgruppemedlemskapResource> stream, int offset, int size, int totalItems) {
         BasisgruppemedlemskapResources resources = new BasisgruppemedlemskapResources();
-        collection.stream().map(this::toResource).forEach(resources::addResource);
-        resources.addSelf(Link.with(self()));
+        stream.map(this::toResource).forEach(resources::addResource);
+        addPagination(resources, offset, size, totalItems);
         return resources;
     }
 

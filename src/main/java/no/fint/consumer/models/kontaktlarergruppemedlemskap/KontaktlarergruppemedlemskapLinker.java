@@ -1,6 +1,5 @@
 package no.fint.consumer.models.kontaktlarergruppemedlemskap;
 
-import no.fint.model.resource.Link;
 import no.fint.model.resource.utdanning.elev.KontaktlarergruppemedlemskapResource;
 import no.fint.model.resource.utdanning.elev.KontaktlarergruppemedlemskapResources;
 import no.fint.relations.FintLinker;
@@ -26,9 +25,14 @@ public class KontaktlarergruppemedlemskapLinker extends FintLinker<Kontaktlarerg
 
     @Override
     public KontaktlarergruppemedlemskapResources toResources(Collection<KontaktlarergruppemedlemskapResource> collection) {
+        return toResources(collection.stream(), 0, 0, collection.size());
+    }
+
+    @Override
+    public KontaktlarergruppemedlemskapResources toResources(Stream<KontaktlarergruppemedlemskapResource> stream, int offset, int size, int totalItems) {
         KontaktlarergruppemedlemskapResources resources = new KontaktlarergruppemedlemskapResources();
-        collection.stream().map(this::toResource).forEach(resources::addResource);
-        resources.addSelf(Link.with(self()));
+        stream.map(this::toResource).forEach(resources::addResource);
+        addPagination(resources, offset, size, totalItems);
         return resources;
     }
 
