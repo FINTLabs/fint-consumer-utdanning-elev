@@ -9,6 +9,7 @@ import org.springframework.security.web.authentication.preauth.PreAuthenticatedA
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 public class FintAccessUserDetailsService implements AuthenticationUserDetailsService<PreAuthenticatedAuthenticationToken> {
@@ -16,8 +17,8 @@ public class FintAccessUserDetailsService implements AuthenticationUserDetailsSe
     public UserDetails loadUserDetails(PreAuthenticatedAuthenticationToken token) throws UsernameNotFoundException {
         FintAccessCredentials credentials = (FintAccessCredentials) token.getCredentials();
         FintAccessPrincipal principal = (FintAccessPrincipal) token.getPrincipal();
-        return User.withUsername(principal.getName())
-                .password(principal.getOrgId())
+        return User.withUsername(Objects.toString(principal.getName(), "anonymous"))
+                .password(Objects.toString(principal.getOrgId(), ".none"))
                 .authorities(getAuthorities(credentials))
                 .build();
     }
