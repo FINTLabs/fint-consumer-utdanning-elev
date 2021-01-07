@@ -31,6 +31,8 @@ class ElevControllerSpec extends Specification {
         HttpHeaders headers = new HttpHeaders()
         headers.add("x-org-id", "pwf.no")
         headers.add("x-client", "test")
+        headers.add("x-fint-access-modify", "/elev")
+        headers.add("x-fint-access-read", "/elev")
         headers.setContentType(MediaType.APPLICATION_JSON_UTF8)
 
         when:
