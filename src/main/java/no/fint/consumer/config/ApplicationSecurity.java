@@ -1,9 +1,9 @@
 package no.fint.consumer.config;
 
-import no.fint.consumer.security.FintAccessDecisionVoter;
-import no.fint.consumer.security.FintAccessUserDetailsService;
-import no.fint.consumer.security.FintRequestHeaderPreauthProcessingFilter;
 import no.fint.consumer.utils.RestEndpoints;
+import no.fint.security.access.security.FintAccessDecisionVoter;
+import no.fint.security.access.security.FintAccessUserDetailsService;
+import no.fint.security.access.security.FintRequestHeaderPreauthProcessingFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.access.AccessDecisionManager;
