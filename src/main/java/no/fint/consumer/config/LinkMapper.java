@@ -1,12 +1,19 @@
 package no.fint.consumer.config;
 
-import com.google.common.collect.ImmutableMap;
 import no.fint.consumer.utils.RestEndpoints;
-import no.fint.model.felles.Kontaktperson;
-import no.fint.model.felles.Person;
-import no.fint.model.utdanning.elev.*;
-
 import java.util.Map;
+import com.google.common.collect.ImmutableMap;
+import no.fint.model.utdanning.elev.Basisgruppe;
+import no.fint.model.utdanning.elev.Basisgruppemedlemskap;
+import no.fint.model.utdanning.elev.Elev;
+import no.fint.model.utdanning.elev.Elevforhold;
+import no.fint.model.utdanning.elev.Kontaktlarergruppe;
+import no.fint.model.utdanning.elev.Kontaktlarergruppemedlemskap;
+import no.fint.model.felles.Kontaktperson;
+import no.fint.model.utdanning.elev.Medlemskap;
+import no.fint.model.felles.Person;
+import no.fint.model.utdanning.elev.Skoleressurs;
+import no.fint.model.utdanning.elev.Undervisningsforhold;
 
 public class LinkMapper {
 
