@@ -5,7 +5,3 @@ springfox:
 spring:
   mvc:
     logResolvedException: false
-
-management:
-  metrics:
-    use
