@@ -47,7 +47,7 @@ dependencies {
     compile('no.fint:fint-events:2.3.0')
     compile('no.fint:fint-hazelcast:1.2.0-rc-1')
     compile('no.fint:fint-relations:2.2.0')
-    compile('no.fint:fint-security-access-policy:1.1.0-rc-1')
+    compile('no.fint:fint-security-access-policy:1.2.0-alpha-1')
     compile('no.fint:fint-spring-secrets:0.1.0')
 
     compile('com.hazelcast:hazelcast:3.11.2')
@@ -58,9 +58,10 @@ dependencies {
 
     compile('org.springframework.boot:spring-boot-starter-web')
     compile('org.springframework.boot:spring-boot-starter-security')
-    compile 'org.springframework.boot:spring-boot-starter-actuator'
-    compile 'io.micrometer:micrometer-registry-prometheus:latest.release'
-    compile 'io.micrometer:micrometer-spring-legacy:latest.release'
+    compile ('org.springframework.boot:spring-boot-starter-actuator')
+
+    compile('io.micrometer:micrometer-registry-prometheus:latest.release')
+    compile('io.micrometer:micrometer-spring-legacy:latest.release')
 
     testCompile('no.fint:fint-test-utils:0.0.5')
     testCompile("cglib:cglib-nodep:${cglibVersion}")

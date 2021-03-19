@@ -3,7 +3,9 @@ package no.fint.consumer.config;
 import no.fint.consumer.utils.RestEndpoints;
 import no.fint.security.access.policy.FintAccessDecisionVoter;
 import no.fint.security.access.policy.FintAccessUserDetailsService;
+import no.fint.security.access.policy.FintBearerTokenJwtPreAuthenticatedProcessingFilter;
 import no.fint.security.access.policy.FintRequestHeaderPreauthProcessingFilter;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.access.AccessDecisionManager;
@@ -19,6 +21,9 @@ import java.util.Collections;
 @Configuration
 public class ApplicationSecurity extends WebSecurityConfigurerAdapter {
 
+    @Value("${fint.idp.well-known-oauth-configuration}")
+    String wellKnownLocation;
+
     @Bean
     FintAccessDecisionVoter fintAccessDecisionVoter() {
         return new FintAccessDecisionVoter();
@@ -29,6 +34,11 @@ public class ApplicationSecurity extends WebSecurityConfigurerAdapter {
         final FintRequestHeaderPreauthProcessingFilter fintRequestHeaderPreauthProcessingFilter = new FintRequestHeaderPreauthProcessingFilter();
         fintRequestHeaderPreauthProcessingFilter.setAuthenticationManager(authenticationManager());
         return fintRequestHeaderPreauthProcessingFilter;
+    }
+
+    @Bean
+    FintBearerTokenJwtPreAuthenticatedProcessingFilter fintBearerTokenJwtPreAuthenticatedProcessingFilter() {
+        return new FintBearerTokenJwtPreAuthenticatedProcessingFilter(wellKnownLocation);
     }
 
     @Bean
@@ -60,7 +70,7 @@ public class ApplicationSecurity extends WebSecurityConfigurerAdapter {
         http
                 .csrf().disable()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
-                .addFilter(fintRequestHeaderPreauthProcessingFilter())
+                .addFilter(fintBearerTokenJwtPreAuthenticatedProcessingFilter())
                 .authenticationProvider(preAuthenticatedAuthenticationProvider())
                 .authorizeRequests()
                 .anyRequest()
