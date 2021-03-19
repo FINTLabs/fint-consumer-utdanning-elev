@@ -66,7 +66,7 @@ public class ApplicationSecurity extends WebSecurityConfigurerAdapter {
 
     @Bean
     AccessDecisionManager accessDecisionManager() {
-        return new UnanimousBased(Arrays.asList(fintAccessDecisionVoter()));
+        return new UnanimousBased(Arrays.asList(fintAccessDecisionVoter(), fintAccessScopeVoter()));
     }
 
     @Override
