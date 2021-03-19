@@ -3,6 +3,8 @@ spring:
   name: fint-consumer-utdanning-elev
 
 fint:
+ idp:
+  well-known-oauth-configuration: https://idp.felleskomponent.no/nidp/oauth/nam/.well-known/openid-configuration
  events:
   orgIds: mock.no
   test-mode: true
