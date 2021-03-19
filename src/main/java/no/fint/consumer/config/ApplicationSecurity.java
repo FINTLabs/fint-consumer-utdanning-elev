@@ -1,10 +1,7 @@
 package no.fint.consumer.config;
 
 import no.fint.consumer.utils.RestEndpoints;
-import no.fint.security.access.policy.FintAccessDecisionVoter;
-import no.fint.security.access.policy.FintAccessUserDetailsService;
-import no.fint.security.access.policy.FintBearerTokenJwtPreAuthenticatedProcessingFilter;
-import no.fint.security.access.policy.FintRequestHeaderPreauthProcessingFilter;
+import no.fint.security.access.policy.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,7 +14,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationProvider;
 
-import java.util.Collections;
+import java.util.Arrays;
 
 @Configuration
 public class ApplicationSecurity extends WebSecurityConfigurerAdapter {
@@ -28,9 +25,17 @@ public class ApplicationSecurity extends WebSecurityConfigurerAdapter {
     @Value("${fint.security.bypass:false}")
     boolean bypass;
 
+    @Value("${fint.security.scope:fint-client}")
+    String scope;
+
     @Bean
     FintAccessDecisionVoter fintAccessDecisionVoter() {
-        return new FintAccessDecisionVoter(bypass ? AccessDecisionVoter.ACCESS_GRANTED : AccessDecisionVoter.ACCESS_DENIED);
+        return new FintAccessDecisionVoter(bypass ? AccessDecisionVoter.ACCESS_GRANTED : AccessDecisionVoter.ACCESS_ABSTAIN);
+    }
+
+    @Bean
+    FintAccessScopeVoter fintAccessScopeVoter() {
+        return new FintAccessScopeVoter(bypass ? AccessDecisionVoter.ACCESS_GRANTED : AccessDecisionVoter.ACCESS_ABSTAIN, scope);
     }
 
     @Bean
@@ -61,7 +66,7 @@ public class ApplicationSecurity extends WebSecurityConfigurerAdapter {
 
     @Bean
     AccessDecisionManager accessDecisionManager() {
-        return new UnanimousBased(Collections.singletonList(fintAccessDecisionVoter()));
+        return new UnanimousBased(Arrays.asList(fintAccessDecisionVoter()));
     }
 
     @Override
