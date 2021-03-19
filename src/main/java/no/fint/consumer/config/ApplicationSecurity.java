@@ -1,7 +1,10 @@
 package no.fint.consumer.config;
 
 import no.fint.consumer.utils.RestEndpoints;
-import no.fint.security.access.policy.*;
+import no.fint.security.access.policy.FintAccessDecisionVoter;
+import no.fint.security.access.policy.FintAccessScopeVoter;
+import no.fint.security.access.policy.FintAccessUserDetailsService;
+import no.fint.security.access.policy.FintBearerTokenJwtPreAuthenticatedProcessingFilter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -36,13 +39,6 @@ public class ApplicationSecurity extends WebSecurityConfigurerAdapter {
     @Bean
     FintAccessScopeVoter fintAccessScopeVoter() {
         return new FintAccessScopeVoter(bypass ? AccessDecisionVoter.ACCESS_GRANTED : AccessDecisionVoter.ACCESS_ABSTAIN, scope);
-    }
-
-    @Bean
-    FintRequestHeaderPreauthProcessingFilter fintRequestHeaderPreauthProcessingFilter() throws Exception {
-        final FintRequestHeaderPreauthProcessingFilter fintRequestHeaderPreauthProcessingFilter = new FintRequestHeaderPreauthProcessingFilter();
-        fintRequestHeaderPreauthProcessingFilter.setAuthenticationManager(authenticationManager());
-        return fintRequestHeaderPreauthProcessingFilter;
     }
 
     @Bean
