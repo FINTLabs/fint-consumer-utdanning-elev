@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.access.AccessDecisionManager;
+import org.springframework.security.access.AccessDecisionVoter;
 import org.springframework.security.access.vote.UnanimousBased;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
@@ -24,9 +25,12 @@ public class ApplicationSecurity extends WebSecurityConfigurerAdapter {
     @Value("${fint.idp.well-known-oauth-configuration}")
     String wellKnownLocation;
 
+    @Value("${fint.security.bypass:false}")
+    boolean bypass;
+
     @Bean
     FintAccessDecisionVoter fintAccessDecisionVoter() {
-        return new FintAccessDecisionVoter();
+        return new FintAccessDecisionVoter(bypass ? AccessDecisionVoter.ACCESS_GRANTED : AccessDecisionVoter.ACCESS_DENIED);
     }
 
     @Bean
@@ -37,8 +41,10 @@ public class ApplicationSecurity extends WebSecurityConfigurerAdapter {
     }
 
     @Bean
-    FintBearerTokenJwtPreAuthenticatedProcessingFilter fintBearerTokenJwtPreAuthenticatedProcessingFilter() {
-        return new FintBearerTokenJwtPreAuthenticatedProcessingFilter(wellKnownLocation);
+    FintBearerTokenJwtPreAuthenticatedProcessingFilter fintBearerTokenJwtPreAuthenticatedProcessingFilter() throws Exception {
+        final FintBearerTokenJwtPreAuthenticatedProcessingFilter fintBearerTokenJwtPreAuthenticatedProcessingFilter = new FintBearerTokenJwtPreAuthenticatedProcessingFilter(wellKnownLocation);
+        fintBearerTokenJwtPreAuthenticatedProcessingFilter.setAuthenticationManager(authenticationManager());
+        return fintBearerTokenJwtPreAuthenticatedProcessingFilter;
     }
 
     @Bean
