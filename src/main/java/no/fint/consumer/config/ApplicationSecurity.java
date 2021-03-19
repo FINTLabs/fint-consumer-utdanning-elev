@@ -30,7 +30,7 @@ public class ApplicationSecurity extends WebSecurityConfigurerAdapter {
 
     @Bean
     FintAccessDecisionVoter fintAccessDecisionVoter() {
-        return new FintAccessDecisionVoter(bypass ? AccessDecisionVoter.ACCESS_GRANTED : AccessDecisionVoter.ACCESS_ABSTAIN);
+        return new FintAccessDecisionVoter(bypass ? AccessDecisionVoter.ACCESS_GRANTED : AccessDecisionVoter.ACCESS_DENIED);
     }
 
     @Bean
