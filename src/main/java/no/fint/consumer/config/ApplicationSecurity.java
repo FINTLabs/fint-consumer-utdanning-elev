@@ -28,6 +28,9 @@ public class ApplicationSecurity extends WebSecurityConfigurerAdapter {
     @Value("${fint.security.bypass:false}")
     boolean bypass;
 
+    @Value("${fint.security.debug:false}")
+    boolean debug;
+
     @Value("${fint.security.scope:fint-client}")
     String scope;
 
@@ -67,7 +70,7 @@ public class ApplicationSecurity extends WebSecurityConfigurerAdapter {
 
     @Override
     public void configure(WebSecurity web) {
-        web.debug(true)
+        web.debug(debug)
                 .ignoring()
                 .antMatchers(RestEndpoints.ADMIN + "/**");
     }
