@@ -30,6 +30,7 @@ repositories {
         url "https://reposilite.fintlabs.no/releases"
     }
     mavenCentral()
+    jcenter()
     maven {
         url "https://dl.bintray.com/fint/maven"
     }
