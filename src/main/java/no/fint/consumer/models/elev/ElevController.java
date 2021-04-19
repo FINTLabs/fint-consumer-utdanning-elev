@@ -31,10 +31,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import javax.security.auth.Subject;
 import javax.servlet.http.HttpServletRequest;
 import java.net.URI;
 import java.net.UnknownHostException;
+import java.security.Principal;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.BlockingQueue;
@@ -102,7 +102,7 @@ public class ElevController {
             @RequestParam(defaultValue = "0") long sinceTimeStamp,
             @RequestParam(defaultValue = "0") int size,
             @RequestParam(defaultValue = "0") int offset,
-            Subject subject,
+            Principal principal,
             HttpServletRequest request) {
         if (cacheService == null) {
             throw new CacheDisabledException("Elev cache is disabled.");
@@ -113,7 +113,7 @@ public class ElevController {
         if (client == null) {
             client = props.getDefaultClient();
         }
-        log.info("Subject: {}", subject);
+        log.info("Principal: {}", principal);
         log.debug("OrgId: {}, Client: {}", orgId, client);
 
         Event event = new Event(orgId, Constants.COMPONENT, ElevActions.GET_ALL_ELEV, client);
@@ -144,7 +144,7 @@ public class ElevController {
     @GetMapping("/brukernavn/{id:.+}")
     public ElevResource getElevByBrukernavn(
             @PathVariable String id,
-            Subject subject,
+            Principal principal,
             @RequestHeader(name = HeaderConstants.ORG_ID, required = false) String orgId,
             @RequestHeader(name = HeaderConstants.CLIENT, required = false) String client) throws InterruptedException {
         if (props.isOverrideOrgId() || orgId == null) {
@@ -153,7 +153,7 @@ public class ElevController {
         if (client == null) {
             client = props.getDefaultClient();
         }
-        log.info("Subject: {}", subject);
+        log.info("Principal: {}", principal);
         log.debug("brukernavn: {}, OrgId: {}, Client: {}", id, orgId, client);
 
         Event event = new Event(orgId, Constants.COMPONENT, ElevActions.GET_ELEV, client);
@@ -190,7 +190,7 @@ public class ElevController {
     @GetMapping("/elevnummer/{id:.+}")
     public ElevResource getElevByElevnummer(
             @PathVariable String id,
-            Subject subject,
+            Principal principal,
             @RequestHeader(name = HeaderConstants.ORG_ID, required = false) String orgId,
             @RequestHeader(name = HeaderConstants.CLIENT, required = false) String client) throws InterruptedException {
         if (props.isOverrideOrgId() || orgId == null) {
@@ -199,7 +199,7 @@ public class ElevController {
         if (client == null) {
             client = props.getDefaultClient();
         }
-        log.info("Subject: {}", subject);
+        log.info("Principal: {}", principal);
         log.debug("elevnummer: {}, OrgId: {}, Client: {}", id, orgId, client);
 
         Event event = new Event(orgId, Constants.COMPONENT, ElevActions.GET_ELEV, client);
