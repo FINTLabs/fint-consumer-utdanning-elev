@@ -98,8 +98,8 @@ public class ElevController {
 
     @GetMapping
     public ElevResources getElev(
-            @RequestHeader(name = HeaderConstants.ORG_ID, required = false) String orgId,
-            @RequestHeader(name = HeaderConstants.CLIENT, required = false) String client,
+            //@RequestHeader(name = HeaderConstants.ORG_ID, required = false) String orgId,
+            //@RequestHeader(name = HeaderConstants.CLIENT, required = false) String client,
             @RequestParam(defaultValue = "0") long sinceTimeStamp,
             @RequestParam(defaultValue = "0") int size,
             @RequestParam(defaultValue = "0") int offset,
@@ -108,6 +108,8 @@ public class ElevController {
         if (cacheService == null) {
             throw new CacheDisabledException("Elev cache is disabled.");
         }
+        String client = userDetails.getUsername();
+        String orgId = userDetails.getOrgId();
         if (props.isOverrideOrgId() || orgId == null) {
             orgId = props.getDefaultOrgId();
         }
@@ -145,9 +147,11 @@ public class ElevController {
     @GetMapping("/brukernavn/{id:.+}")
     public ElevResource getElevByBrukernavn(
             @PathVariable String id,
-            @AuthenticationPrincipal FintUserDetails userDetails,
+            @AuthenticationPrincipal FintUserDetails userDetails /*,
             @RequestHeader(name = HeaderConstants.ORG_ID, required = false) String orgId,
-            @RequestHeader(name = HeaderConstants.CLIENT, required = false) String client) throws InterruptedException {
+            @RequestHeader(name = HeaderConstants.CLIENT, required = false) String client */) throws InterruptedException {
+        String client = userDetails.getUsername();
+        String orgId = userDetails.getOrgId();
         if (props.isOverrideOrgId() || orgId == null) {
             orgId = props.getDefaultOrgId();
         }
@@ -191,9 +195,11 @@ public class ElevController {
     @GetMapping("/elevnummer/{id:.+}")
     public ElevResource getElevByElevnummer(
             @PathVariable String id,
-            @AuthenticationPrincipal FintUserDetails userDetails,
+            @AuthenticationPrincipal FintUserDetails userDetails /*,
             @RequestHeader(name = HeaderConstants.ORG_ID, required = false) String orgId,
-            @RequestHeader(name = HeaderConstants.CLIENT, required = false) String client) throws InterruptedException {
+            @RequestHeader(name = HeaderConstants.CLIENT, required = false) String client */) throws InterruptedException {
+        String orgId = userDetails.getOrgId();
+        String client = userDetails.getUsername();
         if (props.isOverrideOrgId() || orgId == null) {
             orgId = props.getDefaultOrgId();
         }
@@ -231,14 +237,17 @@ public class ElevController {
             fintAuditService.audit(response, Status.SENT_TO_CLIENT);
 
             return linker.toResource(elev);
-        }    
+        }
     }
 
     @GetMapping("/feidenavn/{id:.+}")
     public ElevResource getElevByFeidenavn(
             @PathVariable String id,
+            @AuthenticationPrincipal FintUserDetails userDetails /*,
             @RequestHeader(name = HeaderConstants.ORG_ID, required = false) String orgId,
-            @RequestHeader(name = HeaderConstants.CLIENT, required = false) String client) throws InterruptedException {
+            @RequestHeader(name = HeaderConstants.CLIENT, required = false) String client */) throws InterruptedException {
+        String orgId = userDetails.getOrgId();
+        String client = userDetails.getUsername();
         if (props.isOverrideOrgId() || orgId == null) {
             orgId = props.getDefaultOrgId();
         }
@@ -281,8 +290,11 @@ public class ElevController {
     @GetMapping("/systemid/{id:.+}")
     public ElevResource getElevBySystemId(
             @PathVariable String id,
+            @AuthenticationPrincipal FintUserDetails userDetails /*,
             @RequestHeader(name = HeaderConstants.ORG_ID, required = false) String orgId,
-            @RequestHeader(name = HeaderConstants.CLIENT, required = false) String client) throws InterruptedException {
+            @RequestHeader(name = HeaderConstants.CLIENT, required = false) String client */) throws InterruptedException {
+        String client = userDetails.getUsername();
+        String orgId = userDetails.getOrgId();
         if (props.isOverrideOrgId() || orgId == null) {
             orgId = props.getDefaultOrgId();
         }
