@@ -5,11 +5,8 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.common.collect.ImmutableMap;
 import io.swagger.annotations.Api;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-
 import no.fint.audit.FintAuditService;
-
-import no.fint.cache.exceptions.*;
+import no.fint.cache.exceptions.CacheNotFoundException;
 import no.fint.consumer.config.Constants;
 import no.fint.consumer.config.ConsumerProps;
 import no.fint.consumer.event.ConsumerEventUtil;
@@ -18,11 +15,15 @@ import no.fint.consumer.exceptions.*;
 import no.fint.consumer.status.StatusCache;
 import no.fint.consumer.utils.EventResponses;
 import no.fint.consumer.utils.RestEndpoints;
-
-import no.fint.event.model.*;
-
+import no.fint.event.model.Event;
+import no.fint.event.model.HeaderConstants;
+import no.fint.event.model.Operation;
+import no.fint.event.model.Status;
+import no.fint.model.resource.utdanning.elev.ElevResource;
+import no.fint.model.resource.utdanning.elev.ElevResources;
+import no.fint.model.utdanning.elev.ElevActions;
 import no.fint.relations.FintRelationsMediaType;
-
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -30,19 +31,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import javax.security.auth.Subject;
 import javax.servlet.http.HttpServletRequest;
-import java.net.UnknownHostException;
 import java.net.URI;
-
+import java.net.UnknownHostException;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
-
-import no.fint.model.resource.utdanning.elev.ElevResource;
-import no.fint.model.resource.utdanning.elev.ElevResources;
-import no.fint.model.utdanning.elev.ElevActions;
 
 @Slf4j
 @Api(tags = {"Elev"})
@@ -105,6 +102,7 @@ public class ElevController {
             @RequestParam(defaultValue = "0") long sinceTimeStamp,
             @RequestParam(defaultValue = "0") int size,
             @RequestParam(defaultValue = "0") int offset,
+            Subject subject,
             HttpServletRequest request) {
         if (cacheService == null) {
             throw new CacheDisabledException("Elev cache is disabled.");
@@ -115,6 +113,7 @@ public class ElevController {
         if (client == null) {
             client = props.getDefaultClient();
         }
+        log.info("Subject: {}", subject);
         log.debug("OrgId: {}, Client: {}", orgId, client);
 
         Event event = new Event(orgId, Constants.COMPONENT, ElevActions.GET_ALL_ELEV, client);
@@ -145,6 +144,7 @@ public class ElevController {
     @GetMapping("/brukernavn/{id:.+}")
     public ElevResource getElevByBrukernavn(
             @PathVariable String id,
+            Subject subject,
             @RequestHeader(name = HeaderConstants.ORG_ID, required = false) String orgId,
             @RequestHeader(name = HeaderConstants.CLIENT, required = false) String client) throws InterruptedException {
         if (props.isOverrideOrgId() || orgId == null) {
@@ -153,6 +153,7 @@ public class ElevController {
         if (client == null) {
             client = props.getDefaultClient();
         }
+        log.info("Subject: {}", subject);
         log.debug("brukernavn: {}, OrgId: {}, Client: {}", id, orgId, client);
 
         Event event = new Event(orgId, Constants.COMPONENT, ElevActions.GET_ELEV, client);
@@ -183,12 +184,13 @@ public class ElevController {
             fintAuditService.audit(response, Status.SENT_TO_CLIENT);
 
             return linker.toResource(elev);
-        }    
+        }
     }
 
     @GetMapping("/elevnummer/{id:.+}")
     public ElevResource getElevByElevnummer(
             @PathVariable String id,
+            Subject subject,
             @RequestHeader(name = HeaderConstants.ORG_ID, required = false) String orgId,
             @RequestHeader(name = HeaderConstants.CLIENT, required = false) String client) throws InterruptedException {
         if (props.isOverrideOrgId() || orgId == null) {
@@ -197,6 +199,7 @@ public class ElevController {
         if (client == null) {
             client = props.getDefaultClient();
         }
+        log.info("Subject: {}", subject);
         log.debug("elevnummer: {}, OrgId: {}, Client: {}", id, orgId, client);
 
         Event event = new Event(orgId, Constants.COMPONENT, ElevActions.GET_ELEV, client);
