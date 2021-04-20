@@ -5,6 +5,8 @@ spring:
 fint:
   security:
     bypass: true
+    scope: funny
+    role: dummy
   idp:
     well-known-oauth-configuration: https://idp.felleskomponent.no/nidp/oauth/nam/.well-known/openid-configuration
   events:
