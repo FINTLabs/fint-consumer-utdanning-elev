@@ -31,7 +31,7 @@ public class ApplicationSecurity extends WebSecurityConfigurerAdapter {
     @Value("${fint.security.scope:fint-client}")
     String scope;
 
-    @Value("${fint.security.role:FINT_Client_utdanning_elev}")
+    @Value("${fint.security.role}")
     String role;
 
     @Bean
