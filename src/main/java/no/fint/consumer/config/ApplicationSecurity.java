@@ -1,10 +1,7 @@
 package no.fint.consumer.config;
 
 import no.fint.consumer.utils.RestEndpoints;
-import no.fint.security.access.policy.FintAccessDecisionVoter;
-import no.fint.security.access.policy.FintAccessScopeVoter;
-import no.fint.security.access.policy.FintAccessUserDetailsService;
-import no.fint.security.access.policy.FintBearerTokenJwtPreAuthenticatedProcessingFilter;
+import no.fint.security.access.policy.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -34,6 +31,9 @@ public class ApplicationSecurity extends WebSecurityConfigurerAdapter {
     @Value("${fint.security.scope:fint-client}")
     String scope;
 
+    @Value("${fint.security.role:FINT_Client_utdanning_elev}")
+    String role;
+
     @Bean
     FintAccessDecisionVoter fintAccessDecisionVoter() {
         return new FintAccessDecisionVoter(bypass ? AccessDecisionVoter.ACCESS_GRANTED : AccessDecisionVoter.ACCESS_DENIED);
@@ -41,7 +41,12 @@ public class ApplicationSecurity extends WebSecurityConfigurerAdapter {
 
     @Bean
     FintAccessScopeVoter fintAccessScopeVoter() {
-        return new FintAccessScopeVoter(bypass ? AccessDecisionVoter.ACCESS_GRANTED : AccessDecisionVoter.ACCESS_ABSTAIN, scope);
+        return new FintAccessScopeVoter(scope, bypass ? AccessDecisionVoter.ACCESS_GRANTED : AccessDecisionVoter.ACCESS_ABSTAIN);
+    }
+
+    @Bean
+    FintAccessRoleVoter fintAccessRoleVoter() {
+        return new FintAccessRoleVoter(role, bypass ? AccessDecisionVoter.ACCESS_GRANTED : AccessDecisionVoter.ACCESS_ABSTAIN);
     }
 
     @Bean
@@ -65,7 +70,7 @@ public class ApplicationSecurity extends WebSecurityConfigurerAdapter {
 
     @Bean
     AccessDecisionManager accessDecisionManager() {
-        return new UnanimousBased(Arrays.asList(fintAccessDecisionVoter(), fintAccessScopeVoter()));
+        return new UnanimousBased(Arrays.asList(fintAccessDecisionVoter(), fintAccessScopeVoter(), fintAccessRoleVoter()));
     }
 
     @Override
