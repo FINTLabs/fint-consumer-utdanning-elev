@@ -28,7 +28,7 @@ public class ApplicationSecurity extends WebSecurityConfigurerAdapter {
     @Value("${fint.security.debug:false}")
     boolean debug;
 
-    @Value("${fint.security.scope:fint-client}")
+    @Value("${fint.security.scope}")
     String scope;
 
     @Value("${fint.security.role}")
