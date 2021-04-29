@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.access.AccessDecisionManager;
-import org.springframework.security.access.AccessDecisionVoter;
 import org.springframework.security.access.vote.UnanimousBased;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
@@ -22,9 +21,6 @@ public class ApplicationSecurity extends WebSecurityConfigurerAdapter {
     @Value("${fint.idp.well-known-oauth-configuration}")
     String wellKnownLocation;
 
-    @Value("${fint.security.bypass:false}")
-    boolean bypass;
-
     @Value("${fint.security.debug:false}")
     boolean debug;
 
@@ -35,23 +31,24 @@ public class ApplicationSecurity extends WebSecurityConfigurerAdapter {
     String role;
 
     @Bean
-    FintAccessDecisionVoter fintAccessDecisionVoter() {
-        return new FintAccessDecisionVoter(bypass ? AccessDecisionVoter.ACCESS_GRANTED : AccessDecisionVoter.ACCESS_DENIED);
+    FintAccessPolicyVoter fintAccessPolicyVoter() {
+        return new FintAccessPolicyVoter();
     }
 
     @Bean
     FintAccessScopeVoter fintAccessScopeVoter() {
-        return new FintAccessScopeVoter(scope, bypass ? AccessDecisionVoter.ACCESS_GRANTED : AccessDecisionVoter.ACCESS_ABSTAIN);
+        return new FintAccessScopeVoter(scope);
     }
 
     @Bean
     FintAccessRoleVoter fintAccessRoleVoter() {
-        return new FintAccessRoleVoter(role, bypass ? AccessDecisionVoter.ACCESS_GRANTED : AccessDecisionVoter.ACCESS_DENIED);
+        return new FintAccessRoleVoter(role);
     }
 
     @Bean
     FintBearerTokenJwtPreAuthenticatedProcessingFilter fintBearerTokenJwtPreAuthenticatedProcessingFilter() throws Exception {
-        final FintBearerTokenJwtPreAuthenticatedProcessingFilter fintBearerTokenJwtPreAuthenticatedProcessingFilter = new FintBearerTokenJwtPreAuthenticatedProcessingFilter(wellKnownLocation);
+        final FintBearerTokenJwtPreAuthenticatedProcessingFilter fintBearerTokenJwtPreAuthenticatedProcessingFilter
+                = new FintBearerTokenJwtPreAuthenticatedProcessingFilter(wellKnownLocation);
         fintBearerTokenJwtPreAuthenticatedProcessingFilter.setAuthenticationManager(authenticationManager());
         return fintBearerTokenJwtPreAuthenticatedProcessingFilter;
     }
@@ -70,7 +67,7 @@ public class ApplicationSecurity extends WebSecurityConfigurerAdapter {
 
     @Bean
     AccessDecisionManager accessDecisionManager() {
-        return new UnanimousBased(Arrays.asList(fintAccessDecisionVoter(), fintAccessScopeVoter(), fintAccessRoleVoter()));
+        return new UnanimousBased(Arrays.asList(fintAccessPolicyVoter(), fintAccessScopeVoter(), fintAccessRoleVoter()));
     }
 
     @Override
