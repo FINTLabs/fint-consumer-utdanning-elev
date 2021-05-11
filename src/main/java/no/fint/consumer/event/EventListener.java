@@ -63,7 +63,7 @@ public class EventListener implements FintEventListener {
         log.debug("Received event: {}", event);
         log.trace("Event data: {}", event.getData());
         if (event.isRegisterOrgId()) {
-            if (props.getAssets().add(event.getOrgId())) {
+            if (props.isDynamicRegistration() && props.getAssets().add(event.getOrgId())) {
                 log.info("Registering orgId {} for {}", event.getOrgId(), event.getClient());
                 fintEvents.registerUpstreamListener(event.getOrgId(), this);
                 cacheServices.forEach(c -> {

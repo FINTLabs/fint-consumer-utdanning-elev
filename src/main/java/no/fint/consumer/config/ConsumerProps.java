@@ -25,6 +25,9 @@ public class ConsumerProps {
     @Value("${fint.consumer.status.created:false}")
     private boolean useCreated;
 
+    @Value("${fint.consumer.dynamic-registration:true}")
+    private boolean dynamicRegistration;
+
     private Set<String> assets;
 
     @Autowired
