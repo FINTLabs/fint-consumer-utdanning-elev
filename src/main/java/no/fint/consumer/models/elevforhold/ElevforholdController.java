@@ -30,6 +30,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import no.fint.security.access.policy.FintUserDetails;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+
 import javax.servlet.http.HttpServletRequest;
 import java.net.UnknownHostException;
 import java.net.URI;
@@ -76,7 +79,8 @@ public class ElevforholdController {
     private SynchronousEvents synchronousEvents;
 
     @GetMapping("/last-updated")
-    public Map<String, String> getLastUpdated(@RequestHeader(name = HeaderConstants.ORG_ID, required = false) String orgId) {
+    public Map<String, String> getLastUpdated(@AuthenticationPrincipal FintUserDetails userDetails) {
+        String orgId = userDetails.getOrgId();
         if (cacheService == null) {
             throw new CacheDisabledException("Elevforhold cache is disabled.");
         }
@@ -88,7 +92,8 @@ public class ElevforholdController {
     }
 
     @GetMapping("/cache/size")
-    public ImmutableMap<String, Integer> getCacheSize(@RequestHeader(name = HeaderConstants.ORG_ID, required = false) String orgId) {
+    public ImmutableMap<String, Integer> getCacheSize(@AuthenticationPrincipal FintUserDetails userDetails) {
+        String orgId = userDetails.getOrgId();
         if (cacheService == null) {
             throw new CacheDisabledException("Elevforhold cache is disabled.");
         }
@@ -100,12 +105,13 @@ public class ElevforholdController {
 
     @GetMapping
     public ElevforholdResources getElevforhold(
-            @RequestHeader(name = HeaderConstants.ORG_ID, required = false) String orgId,
-            @RequestHeader(name = HeaderConstants.CLIENT, required = false) String client,
             @RequestParam(defaultValue = "0") long sinceTimeStamp,
             @RequestParam(defaultValue = "0") int size,
             @RequestParam(defaultValue = "0") int offset,
+            @AuthenticationPrincipal FintUserDetails userDetails,
             HttpServletRequest request) {
+        String client = userDetails.getUsername();
+        String orgId = userDetails.getOrgId();
         if (cacheService == null) {
             throw new CacheDisabledException("Elevforhold cache is disabled.");
         }
@@ -145,8 +151,9 @@ public class ElevforholdController {
     @GetMapping("/systemid/{id:.+}")
     public ElevforholdResource getElevforholdBySystemId(
             @PathVariable String id,
-            @RequestHeader(name = HeaderConstants.ORG_ID, required = false) String orgId,
-            @RequestHeader(name = HeaderConstants.CLIENT, required = false) String client) throws InterruptedException {
+            @AuthenticationPrincipal FintUserDetails userDetails) throws InterruptedException {
+        String client = userDetails.getUsername();
+        String orgId = userDetails.getOrgId();
         if (props.isOverrideOrgId() || orgId == null) {
             orgId = props.getDefaultOrgId();
         }

@@ -1,23 +1,28 @@
 spring:
- application:
-  name: fint-consumer-utdanning-elev
+  application:
+    name: fint-consumer-utdanning-elev
 
 fint:
- events:
-  orgIds: mock.no
-  test-mode: true
-  queue-endpoint-enabled: true
+  security:
+    role: dummy
+    scope: dummy
+  idp:
+    well-known-oauth-configuration: https://idp.felleskomponent.no/nidp/oauth/nam/.well-known/openid-configuration
+  events:
+    orgIds: mock.no
+    test-mode: true
+    queue-endpoint-enabled: true
 
- audit:
-  test-mode: true
+  audit:
+    test-mode: true
 
- relations:
-  force-https: false
-  default-base-url: /
+  relations:
+    force-https: false
+    default-base-url: /
 
- hazelcast:
-  members: localhost
+  hazelcast:
+    members: localhost
 
 server:
- context-path: ""
- port: 8080
+  context-path: ""
+  port: 8080

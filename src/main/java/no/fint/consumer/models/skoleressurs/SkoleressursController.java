@@ -30,6 +30,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import no.fint.security.access.policy.FintUserDetails;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+
 import javax.servlet.http.HttpServletRequest;
 import java.net.UnknownHostException;
 import java.net.URI;
@@ -76,7 +79,8 @@ public class SkoleressursController {
     private SynchronousEvents synchronousEvents;
 
     @GetMapping("/last-updated")
-    public Map<String, String> getLastUpdated(@RequestHeader(name = HeaderConstants.ORG_ID, required = false) String orgId) {
+    public Map<String, String> getLastUpdated(@AuthenticationPrincipal FintUserDetails userDetails) {
+        String orgId = userDetails.getOrgId();
         if (cacheService == null) {
             throw new CacheDisabledException("Skoleressurs cache is disabled.");
         }
@@ -88,7 +92,8 @@ public class SkoleressursController {
     }
 
     @GetMapping("/cache/size")
-    public ImmutableMap<String, Integer> getCacheSize(@RequestHeader(name = HeaderConstants.ORG_ID, required = false) String orgId) {
+    public ImmutableMap<String, Integer> getCacheSize(@AuthenticationPrincipal FintUserDetails userDetails) {
+        String orgId = userDetails.getOrgId();
         if (cacheService == null) {
             throw new CacheDisabledException("Skoleressurs cache is disabled.");
         }
@@ -100,12 +105,13 @@ public class SkoleressursController {
 
     @GetMapping
     public SkoleressursResources getSkoleressurs(
-            @RequestHeader(name = HeaderConstants.ORG_ID, required = false) String orgId,
-            @RequestHeader(name = HeaderConstants.CLIENT, required = false) String client,
             @RequestParam(defaultValue = "0") long sinceTimeStamp,
             @RequestParam(defaultValue = "0") int size,
             @RequestParam(defaultValue = "0") int offset,
+            @AuthenticationPrincipal FintUserDetails userDetails,
             HttpServletRequest request) {
+        String client = userDetails.getUsername();
+        String orgId = userDetails.getOrgId();
         if (cacheService == null) {
             throw new CacheDisabledException("Skoleressurs cache is disabled.");
         }
@@ -145,8 +151,9 @@ public class SkoleressursController {
     @GetMapping("/feidenavn/{id:.+}")
     public SkoleressursResource getSkoleressursByFeidenavn(
             @PathVariable String id,
-            @RequestHeader(name = HeaderConstants.ORG_ID, required = false) String orgId,
-            @RequestHeader(name = HeaderConstants.CLIENT, required = false) String client) throws InterruptedException {
+            @AuthenticationPrincipal FintUserDetails userDetails) throws InterruptedException {
+        String client = userDetails.getUsername();
+        String orgId = userDetails.getOrgId();
         if (props.isOverrideOrgId() || orgId == null) {
             orgId = props.getDefaultOrgId();
         }
@@ -189,8 +196,9 @@ public class SkoleressursController {
     @GetMapping("/systemid/{id:.+}")
     public SkoleressursResource getSkoleressursBySystemId(
             @PathVariable String id,
-            @RequestHeader(name = HeaderConstants.ORG_ID, required = false) String orgId,
-            @RequestHeader(name = HeaderConstants.CLIENT, required = false) String client) throws InterruptedException {
+            @AuthenticationPrincipal FintUserDetails userDetails) throws InterruptedException {
+        String client = userDetails.getUsername();
+        String orgId = userDetails.getOrgId();
         if (props.isOverrideOrgId() || orgId == null) {
             orgId = props.getDefaultOrgId();
         }
@@ -236,19 +244,21 @@ public class SkoleressursController {
     @GetMapping("/status/{id}")
     public ResponseEntity getStatus(
             @PathVariable String id,
-            @RequestHeader(HeaderConstants.ORG_ID) String orgId,
-            @RequestHeader(HeaderConstants.CLIENT) String client) {
+            @AuthenticationPrincipal FintUserDetails userDetails) {
+        String client = userDetails.getUsername();
+        String orgId = userDetails.getOrgId();
         log.debug("/status/{} for {} from {}", id, orgId, client);
         return statusCache.handleStatusRequest(id, orgId, linker, SkoleressursResource.class);
     }
 
     @PostMapping
     public ResponseEntity postSkoleressurs(
-            @RequestHeader(name = HeaderConstants.ORG_ID) String orgId,
-            @RequestHeader(name = HeaderConstants.CLIENT) String client,
+            @AuthenticationPrincipal FintUserDetails userDetails,
             @RequestBody SkoleressursResource body,
             @RequestParam(name = "validate", required = false) boolean validate
     ) {
+        String client = userDetails.getUsername();
+        String orgId = userDetails.getOrgId();
         log.debug("postSkoleressurs, Validate: {}, OrgId: {}, Client: {}", validate, orgId, client);
         log.trace("Body: {}", body);
         linker.mapLinks(body);
@@ -267,10 +277,11 @@ public class SkoleressursController {
     @PutMapping("/feidenavn/{id:.+}")
     public ResponseEntity putSkoleressursByFeidenavn(
             @PathVariable String id,
-            @RequestHeader(name = HeaderConstants.ORG_ID) String orgId,
-            @RequestHeader(name = HeaderConstants.CLIENT) String client,
+            @AuthenticationPrincipal FintUserDetails userDetails,
             @RequestBody SkoleressursResource body
     ) {
+        String client = userDetails.getUsername();
+        String orgId = userDetails.getOrgId();
         log.debug("putSkoleressursByFeidenavn {}, OrgId: {}, Client: {}", id, orgId, client);
         log.trace("Body: {}", body);
         linker.mapLinks(body);
@@ -291,10 +302,11 @@ public class SkoleressursController {
     @PutMapping("/systemid/{id:.+}")
     public ResponseEntity putSkoleressursBySystemId(
             @PathVariable String id,
-            @RequestHeader(name = HeaderConstants.ORG_ID) String orgId,
-            @RequestHeader(name = HeaderConstants.CLIENT) String client,
+            @AuthenticationPrincipal FintUserDetails userDetails,
             @RequestBody SkoleressursResource body
     ) {
+        String client = userDetails.getUsername();
+        String orgId = userDetails.getOrgId();
         log.debug("putSkoleressursBySystemId {}, OrgId: {}, Client: {}", id, orgId, client);
         log.trace("Body: {}", body);
         linker.mapLinks(body);
