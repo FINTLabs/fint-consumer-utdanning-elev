@@ -13,6 +13,8 @@ public enum RestEndpoints {
 	public static final String KONTAKTPERSON = "/kontaktperson";
 	public static final String MEDLEMSKAP = "/medlemskap";
 	public static final String PERSON = "/person";
+	public static final String PERSONGRUPPE = "/persongruppe";
+	public static final String PERSONGRUPPEMEDLEMSKAP = "/persongruppemedlemskap";
 	public static final String SKOLERESSURS = "/skoleressurs";
 	public static final String UNDERVISNINGSFORHOLD = "/undervisningsforhold";
 
