@@ -35,10 +35,16 @@ public enum Constants {
     public static final String CACHE_INITIALDELAY_PERSON = "${fint.consumer.cache.initialDelay.person:1700000}";
     public static final String CACHE_FIXEDRATE_PERSON = "${fint.consumer.cache.fixedRate.person:900000}";
     
-    public static final String CACHE_INITIALDELAY_SKOLERESSURS = "${fint.consumer.cache.initialDelay.skoleressurs:1800000}";
+    public static final String CACHE_INITIALDELAY_PERSONGRUPPE = "${fint.consumer.cache.initialDelay.persongruppe:1800000}";
+    public static final String CACHE_FIXEDRATE_PERSONGRUPPE = "${fint.consumer.cache.fixedRate.persongruppe:900000}";
+    
+    public static final String CACHE_INITIALDELAY_PERSONGRUPPEMEDLEMSKAP = "${fint.consumer.cache.initialDelay.persongruppemedlemskap:1900000}";
+    public static final String CACHE_FIXEDRATE_PERSONGRUPPEMEDLEMSKAP = "${fint.consumer.cache.fixedRate.persongruppemedlemskap:900000}";
+    
+    public static final String CACHE_INITIALDELAY_SKOLERESSURS = "${fint.consumer.cache.initialDelay.skoleressurs:2000000}";
     public static final String CACHE_FIXEDRATE_SKOLERESSURS = "${fint.consumer.cache.fixedRate.skoleressurs:900000}";
     
-    public static final String CACHE_INITIALDELAY_UNDERVISNINGSFORHOLD = "${fint.consumer.cache.initialDelay.undervisningsforhold:1900000}";
+    public static final String CACHE_INITIALDELAY_UNDERVISNINGSFORHOLD = "${fint.consumer.cache.initialDelay.undervisningsforhold:2100000}";
     public static final String CACHE_FIXEDRATE_UNDERVISNINGSFORHOLD = "${fint.consumer.cache.fixedRate.undervisningsforhold:900000}";
     
 

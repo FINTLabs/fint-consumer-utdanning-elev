@@ -12,6 +12,8 @@ import no.fint.model.utdanning.elev.Kontaktlarergruppemedlemskap;
 import no.fint.model.felles.Kontaktperson;
 import no.fint.model.utdanning.elev.Medlemskap;
 import no.fint.model.felles.Person;
+import no.fint.model.utdanning.elev.Persongruppe;
+import no.fint.model.utdanning.elev.Persongruppemedlemskap;
 import no.fint.model.utdanning.elev.Skoleressurs;
 import no.fint.model.utdanning.elev.Undervisningsforhold;
 
@@ -28,6 +30,8 @@ public class LinkMapper {
             .put(Kontaktperson.class.getName(), contextPath + RestEndpoints.KONTAKTPERSON)
             .put(Medlemskap.class.getName(), contextPath + RestEndpoints.MEDLEMSKAP)
             .put(Person.class.getName(), contextPath + RestEndpoints.PERSON)
+            .put(Persongruppe.class.getName(), contextPath + RestEndpoints.PERSONGRUPPE)
+            .put(Persongruppemedlemskap.class.getName(), contextPath + RestEndpoints.PERSONGRUPPEMEDLEMSKAP)
             .put(Skoleressurs.class.getName(), contextPath + RestEndpoints.SKOLERESSURS)
             .put(Undervisningsforhold.class.getName(), contextPath + RestEndpoints.UNDERVISNINGSFORHOLD)
             .put("no.fint.model.felles.kodeverk.iso.Landkode", "/felles/kodeverk/iso/landkode")
