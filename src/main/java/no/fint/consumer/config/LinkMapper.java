@@ -3,10 +3,12 @@ package no.fint.consumer.config;
 import no.fint.consumer.utils.RestEndpoints;
 import java.util.Map;
 import com.google.common.collect.ImmutableMap;
+import no.fint.model.utdanning.vurdering.Anmerkninger;
 import no.fint.model.utdanning.elev.Basisgruppe;
 import no.fint.model.utdanning.elev.Basisgruppemedlemskap;
 import no.fint.model.utdanning.elev.Elev;
 import no.fint.model.utdanning.elev.Elevforhold;
+import no.fint.model.utdanning.elev.Elevtilrettelegging;
 import no.fint.model.utdanning.elev.Kontaktlarergruppe;
 import no.fint.model.utdanning.elev.Kontaktlarergruppemedlemskap;
 import no.fint.model.felles.Kontaktperson;
@@ -21,10 +23,12 @@ public class LinkMapper {
 
     public static Map<String, String> linkMapper(String contextPath) {
         return ImmutableMap.<String,String>builder()
+            .put(Anmerkninger.class.getName(), contextPath + RestEndpoints.ANMERKNINGER)
             .put(Basisgruppe.class.getName(), contextPath + RestEndpoints.BASISGRUPPE)
             .put(Basisgruppemedlemskap.class.getName(), contextPath + RestEndpoints.BASISGRUPPEMEDLEMSKAP)
             .put(Elev.class.getName(), contextPath + RestEndpoints.ELEV)
             .put(Elevforhold.class.getName(), contextPath + RestEndpoints.ELEVFORHOLD)
+            .put(Elevtilrettelegging.class.getName(), contextPath + RestEndpoints.ELEVTILRETTELEGGING)
             .put(Kontaktlarergruppe.class.getName(), contextPath + RestEndpoints.KONTAKTLARERGRUPPE)
             .put(Kontaktlarergruppemedlemskap.class.getName(), contextPath + RestEndpoints.KONTAKTLARERGRUPPEMEDLEMSKAP)
             .put(Kontaktperson.class.getName(), contextPath + RestEndpoints.KONTAKTPERSON)
@@ -39,15 +43,27 @@ public class LinkMapper {
             .put("no.fint.model.utdanning.kodeverk.Termin", "/utdanning/kodeverk/termin")
             .put("no.fint.model.utdanning.utdanningsprogram.Arstrinn", "/utdanning/utdanningsprogram/arstrinn")
             .put("no.fint.model.utdanning.utdanningsprogram.Skole", "/utdanning/utdanningsprogram/skole")
+            .put("no.fint.model.utdanning.kodeverk.Fagmerknad", "/utdanning/kodeverk/fagmerknad")
             .put("no.fint.model.utdanning.kodeverk.Elevkategori", "/utdanning/kodeverk/elevkategori")
+            .put("no.fint.model.utdanning.kodeverk.Avbruddsarsak", "/utdanning/kodeverk/avbruddsarsak")
             .put("no.fint.model.utdanning.timeplan.Undervisningsgruppemedlemskap", "/utdanning/timeplan/undervisningsgruppemedlemskap")
             .put("no.fint.model.utdanning.vurdering.Vurdering", "/utdanning/vurdering/vurdering")
+            .put("no.fint.model.utdanning.vurdering.Sluttordensvurdering", "/utdanning/vurdering/sluttordensvurdering")
+            .put("no.fint.model.utdanning.vurdering.Underveisfagvurdering", "/utdanning/vurdering/underveisfagvurdering")
+            .put("no.fint.model.utdanning.vurdering.Halvarsfagvurdering", "/utdanning/vurdering/halvarsfagvurdering")
+            .put("no.fint.model.utdanning.vurdering.Sluttfagvurdering", "/utdanning/vurdering/sluttfagvurdering")
             .put("no.fint.model.utdanning.vurdering.Eksamensgruppemedlemskap", "/utdanning/vurdering/eksamensgruppemedlemskap")
+            .put("no.fint.model.utdanning.vurdering.Fravarsoversikt", "/utdanning/vurdering/fravarsoversikt")
+            .put("no.fint.model.utdanning.vurdering.Halvarsordensvurdering", "/utdanning/vurdering/halvarsordensvurdering")
             .put("no.fint.model.utdanning.utdanningsprogram.Programomrade", "/utdanning/utdanningsprogram/programomrade")
             .put("no.fint.model.utdanning.vurdering.Fravar", "/utdanning/vurdering/fravar")
             .put("no.fint.model.utdanning.utdanningsprogram.Programomrademedlemskap", "/utdanning/utdanningsprogram/programomrademedlemskap")
+            .put("no.fint.model.utdanning.vurdering.Underveisordensvurdering", "/utdanning/vurdering/underveisordensvurdering")
             .put("no.fint.model.utdanning.vurdering.Eksamensgruppe", "/utdanning/vurdering/eksamensgruppe")
             .put("no.fint.model.utdanning.timeplan.Undervisningsgruppe", "/utdanning/timeplan/undervisningsgruppe")
+            .put("no.fint.model.utdanning.timeplan.Fag", "/utdanning/timeplan/fag")
+            .put("no.fint.model.utdanning.kodeverk.Tilrettelegging", "/utdanning/kodeverk/tilrettelegging")
+            .put("no.fint.model.felles.kodeverk.Kommune", "/felles/kodeverk/kommune")
             .put("no.fint.model.felles.kodeverk.iso.Kjonn", "/felles/kodeverk/iso/kjonn")
             .put("no.fint.model.felles.kodeverk.iso.Sprak", "/felles/kodeverk/iso/sprak")
             .put("no.fint.model.administrasjon.personal.Personalressurs", "/administrasjon/personal/personalressurs")
