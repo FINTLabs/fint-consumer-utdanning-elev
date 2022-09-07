@@ -46,6 +46,8 @@ public class LinkMapper {
             .put("no.fint.model.utdanning.kodeverk.Fagmerknad", "/utdanning/kodeverk/fagmerknad")
             .put("no.fint.model.utdanning.kodeverk.Elevkategori", "/utdanning/kodeverk/elevkategori")
             .put("no.fint.model.utdanning.kodeverk.Avbruddsarsak", "/utdanning/kodeverk/avbruddsarsak")
+            .put("no.fint.model.utdanning.vurdering.Elevfravar", "/utdanning/vurdering/elevfravar")
+            .put("no.fint.model.utdanning.timeplan.Faggruppemedlemskap", "/utdanning/timeplan/faggruppemedlemskap")
             .put("no.fint.model.utdanning.timeplan.Undervisningsgruppemedlemskap", "/utdanning/timeplan/undervisningsgruppemedlemskap")
             .put("no.fint.model.utdanning.vurdering.Vurdering", "/utdanning/vurdering/vurdering")
             .put("no.fint.model.utdanning.vurdering.Sluttordensvurdering", "/utdanning/vurdering/sluttordensvurdering")
@@ -67,6 +69,7 @@ public class LinkMapper {
             .put("no.fint.model.felles.kodeverk.iso.Kjonn", "/felles/kodeverk/iso/kjonn")
             .put("no.fint.model.felles.kodeverk.iso.Sprak", "/felles/kodeverk/iso/sprak")
             .put("no.fint.model.administrasjon.personal.Personalressurs", "/administrasjon/personal/personalressurs")
+            .put("no.fint.model.utdanning.vurdering.Sensor", "/utdanning/vurdering/sensor")
             .put("no.fint.model.administrasjon.personal.Arbeidsforhold", "/administrasjon/personal/arbeidsforhold")
             .put("no.fint.model.utdanning.timeplan.Time", "/utdanning/timeplan/time")
             /* .put(TODO,TODO) */
