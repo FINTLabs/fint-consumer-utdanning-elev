@@ -69,6 +69,8 @@ public class LinkMapper {
             .put("no.fint.model.felles.kodeverk.iso.Kjonn", "/felles/kodeverk/iso/kjonn")
             .put("no.fint.model.felles.kodeverk.iso.Sprak", "/felles/kodeverk/iso/sprak")
             .put("no.fint.model.administrasjon.personal.Personalressurs", "/administrasjon/personal/personalressurs")
+            .put("no.fint.model.utdanning.larling.Larling", "/utdanning/larling/larling")
+            .put("no.fint.model.utdanning.ot.OTUngdom", "/utdanning/ot/otungdom")
             .put("no.fint.model.utdanning.vurdering.Sensor", "/utdanning/vurdering/sensor")
             .put("no.fint.model.administrasjon.personal.Arbeidsforhold", "/administrasjon/personal/arbeidsforhold")
             .put("no.fint.model.utdanning.timeplan.Time", "/utdanning/timeplan/time")
