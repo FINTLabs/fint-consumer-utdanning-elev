@@ -1,15 +1,11 @@
 package no.fint.consumer.models.elevforhold;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.common.collect.ImmutableMap;
 import io.swagger.annotations.Api;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-
 import no.fint.audit.FintAuditService;
-
-import no.fint.cache.exceptions.*;
+import no.fint.cache.exceptions.CacheNotFoundException;
 import no.fint.consumer.config.Constants;
 import no.fint.consumer.config.ConsumerProps;
 import no.fint.consumer.event.ConsumerEventUtil;
@@ -17,32 +13,30 @@ import no.fint.consumer.event.SynchronousEvents;
 import no.fint.consumer.exceptions.*;
 import no.fint.consumer.status.StatusCache;
 import no.fint.consumer.utils.EventResponses;
+import no.fint.consumer.utils.ResponseUtil;
 import no.fint.consumer.utils.RestEndpoints;
-
-import no.fint.event.model.*;
-
+import no.fint.event.model.Event;
+import no.fint.event.model.HeaderConstants;
+import no.fint.event.model.Operation;
+import no.fint.event.model.Status;
+import no.fint.model.resource.utdanning.elev.ElevforholdResource;
+import no.fint.model.resource.utdanning.elev.ElevforholdResources;
+import no.fint.model.utdanning.elev.ElevActions;
 import no.fint.relations.FintRelationsMediaType;
-
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.servlet.http.HttpServletRequest;
 import java.net.UnknownHostException;
-import java.net.URI;
-
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
-
-import no.fint.model.resource.utdanning.elev.ElevforholdResource;
-import no.fint.model.resource.utdanning.elev.ElevforholdResources;
-import no.fint.model.utdanning.elev.ElevActions;
 
 @Slf4j
 @Api(tags = {"Elevforhold"})
@@ -183,10 +177,8 @@ public class ElevforholdController {
             fintAuditService.audit(response, Status.SENT_TO_CLIENT);
 
             return linker.toResource(elevforhold);
-        }    
+        }
     }
-
-
 
 
     //
@@ -203,7 +195,8 @@ public class ElevforholdController {
     }
 
     @ExceptionHandler(EntityNotFoundException.class)
-    public ResponseEntity handleEntityNotFound(Exception e) {
+    public ResponseEntity handleEntityNotFound(HttpServletRequest request, Exception e) {
+        ResponseUtil.logError(request);
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ErrorResponse.of(e));
     }
 
@@ -213,7 +206,7 @@ public class ElevforholdController {
     }
 
     @ExceptionHandler(EntityFoundException.class)
-    public ResponseEntity handleEntityFound(Exception e) {
+    public ResponseEntity handleEntityFound(HttpServletRequest request, Exception e) {
         return ResponseEntity.status(HttpStatus.FOUND).body(ErrorResponse.of(e));
     }
 

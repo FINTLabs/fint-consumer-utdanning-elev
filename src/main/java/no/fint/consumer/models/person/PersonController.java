@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.common.collect.ImmutableMap;
 import io.swagger.annotations.Api;
 import lombok.extern.slf4j.Slf4j;
+import no.fint.consumer.utils.ResponseUtil;
 import org.apache.commons.lang3.StringUtils;
 
 import no.fint.audit.FintAuditService;
@@ -259,7 +260,8 @@ public class PersonController {
     }
 
     @ExceptionHandler(EntityNotFoundException.class)
-    public ResponseEntity handleEntityNotFound(Exception e) {
+    public ResponseEntity handleEntityNotFound(HttpServletRequest request, Exception e) {
+        ResponseUtil.logError(request);
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ErrorResponse.of(e));
     }
 
