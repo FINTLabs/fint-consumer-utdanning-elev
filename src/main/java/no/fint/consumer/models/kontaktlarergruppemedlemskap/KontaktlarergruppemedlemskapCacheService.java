@@ -107,7 +107,9 @@ public class KontaktlarergruppemedlemskapCacheService extends CacheService<Konta
         } else {
             data = objectMapper.convertValue(event.getData(), javaType);
         }
-        data.forEach(linker::mapLinks);
+        data.forEach(resource -> {
+
+        });
         if (ElevActions.valueOf(event.getAction()) == ElevActions.UPDATE_KONTAKTLARERGRUPPEMEDLEMSKAP) {
             if (event.getResponseStatus() == ResponseStatus.ACCEPTED || event.getResponseStatus() == ResponseStatus.CONFLICT) {
                 List<CacheObject<KontaktlarergruppemedlemskapResource>> cacheObjects = data

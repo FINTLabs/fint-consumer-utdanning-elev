@@ -117,7 +117,10 @@ public class SkoleressursCacheService extends CacheService<SkoleressursResource>
         } else {
             data = objectMapper.convertValue(event.getData(), javaType);
         }
-        data.forEach(linker::mapLinks);
+        data.forEach(resource -> {
+            linker.mapLinks(resource);
+            linker.resetSelfLinks(resource);
+        });
         if (ElevActions.valueOf(event.getAction()) == ElevActions.UPDATE_SKOLERESSURS) {
             if (event.getResponseStatus() == ResponseStatus.ACCEPTED || event.getResponseStatus() == ResponseStatus.CONFLICT) {
                 List<CacheObject<SkoleressursResource>> cacheObjects = data
