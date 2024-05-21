@@ -182,7 +182,7 @@ public class MedlemskapController {
 
             fintAuditService.audit(response, Status.SENT_TO_CLIENT);
 
-            return linker.toResource(medlemskap);
+            return linker.mapAndResetLinks(medlemskap);
         }    
     }
 
