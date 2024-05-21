@@ -19,5 +19,6 @@ public enum RestEndpoints {
 	public static final String PERSONGRUPPEMEDLEMSKAP = "/persongruppemedlemskap";
 	public static final String SKOLERESSURS = "/skoleressurs";
 	public static final String UNDERVISNINGSFORHOLD = "/undervisningsforhold";
+	public static final String VARSEL = "/varsel";
 
 }

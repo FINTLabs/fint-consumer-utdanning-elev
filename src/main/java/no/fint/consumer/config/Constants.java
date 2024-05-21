@@ -53,5 +53,8 @@ public enum Constants {
     public static final String CACHE_INITIALDELAY_UNDERVISNINGSFORHOLD = "${fint.consumer.cache.initialDelay.undervisningsforhold:2300000}";
     public static final String CACHE_FIXEDRATE_UNDERVISNINGSFORHOLD = "${fint.consumer.cache.fixedRate.undervisningsforhold:900000}";
     
+    public static final String CACHE_INITIALDELAY_VARSEL = "${fint.consumer.cache.initialDelay.varsel:2400000}";
+    public static final String CACHE_FIXEDRATE_VARSEL = "${fint.consumer.cache.fixedRate.varsel:900000}";
+    
 
 }

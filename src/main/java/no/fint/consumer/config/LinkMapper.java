@@ -18,6 +18,7 @@ import no.fint.model.utdanning.elev.Persongruppe;
 import no.fint.model.utdanning.elev.Persongruppemedlemskap;
 import no.fint.model.utdanning.elev.Skoleressurs;
 import no.fint.model.utdanning.elev.Undervisningsforhold;
+import no.fint.model.utdanning.elev.Varsel;
 
 public class LinkMapper {
 
@@ -38,6 +39,7 @@ public class LinkMapper {
             .put(Persongruppemedlemskap.class.getName(), contextPath + RestEndpoints.PERSONGRUPPEMEDLEMSKAP)
             .put(Skoleressurs.class.getName(), contextPath + RestEndpoints.SKOLERESSURS)
             .put(Undervisningsforhold.class.getName(), contextPath + RestEndpoints.UNDERVISNINGSFORHOLD)
+            .put(Varsel.class.getName(), contextPath + RestEndpoints.VARSEL)
             .put("no.fint.model.felles.kodeverk.iso.Landkode", "/felles/kodeverk/iso/landkode")
             .put("no.fint.model.utdanning.kodeverk.Skolear", "/utdanning/kodeverk/skolear")
             .put("no.fint.model.utdanning.kodeverk.Termin", "/utdanning/kodeverk/termin")
@@ -58,6 +60,7 @@ public class LinkMapper {
             .put("no.fint.model.utdanning.vurdering.Fravarsoversikt", "/utdanning/vurdering/fravarsoversikt")
             .put("no.fint.model.utdanning.vurdering.Halvarsordensvurdering", "/utdanning/vurdering/halvarsordensvurdering")
             .put("no.fint.model.utdanning.utdanningsprogram.Programomrade", "/utdanning/utdanningsprogram/programomrade")
+            .put("no.fint.model.utdanning.vurdering.Elevvurdering", "/utdanning/vurdering/elevvurdering")
             .put("no.fint.model.utdanning.vurdering.Fravar", "/utdanning/vurdering/fravar")
             .put("no.fint.model.utdanning.utdanningsprogram.Programomrademedlemskap", "/utdanning/utdanningsprogram/programomrademedlemskap")
             .put("no.fint.model.utdanning.vurdering.Underveisordensvurdering", "/utdanning/vurdering/underveisordensvurdering")
@@ -65,6 +68,7 @@ public class LinkMapper {
             .put("no.fint.model.utdanning.timeplan.Undervisningsgruppe", "/utdanning/timeplan/undervisningsgruppe")
             .put("no.fint.model.utdanning.timeplan.Fag", "/utdanning/timeplan/fag")
             .put("no.fint.model.utdanning.kodeverk.Tilrettelegging", "/utdanning/kodeverk/tilrettelegging")
+            .put("no.fint.model.utdanning.kodeverk.Eksamensform", "/utdanning/kodeverk/eksamensform")
             .put("no.fint.model.felles.kodeverk.Kommune", "/felles/kodeverk/kommune")
             .put("no.fint.model.felles.kodeverk.iso.Kjonn", "/felles/kodeverk/iso/kjonn")
             .put("no.fint.model.felles.kodeverk.iso.Sprak", "/felles/kodeverk/iso/sprak")
@@ -74,6 +78,7 @@ public class LinkMapper {
             .put("no.fint.model.utdanning.vurdering.Sensor", "/utdanning/vurdering/sensor")
             .put("no.fint.model.administrasjon.personal.Arbeidsforhold", "/administrasjon/personal/arbeidsforhold")
             .put("no.fint.model.utdanning.timeplan.Time", "/utdanning/timeplan/time")
+            .put("no.fint.model.utdanning.kodeverk.Varseltype", "/utdanning/kodeverk/varseltype")
             /* .put(TODO,TODO) */
             .build();
     }

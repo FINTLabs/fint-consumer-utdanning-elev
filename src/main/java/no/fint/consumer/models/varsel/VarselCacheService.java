@@ -1,4 +1,4 @@
-package no.fint.consumer.models.kontaktlarergruppemedlemskap;
+package no.fint.consumer.models.varsel;
 
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -26,17 +26,17 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import no.fint.model.utdanning.elev.Kontaktlarergruppemedlemskap;
-import no.fint.model.resource.utdanning.elev.KontaktlarergruppemedlemskapResource;
+import no.fint.model.utdanning.elev.Varsel;
+import no.fint.model.resource.utdanning.elev.VarselResource;
 import no.fint.model.utdanning.elev.ElevActions;
 import no.fint.model.felles.kompleksedatatyper.Identifikator;
 
 @Slf4j
 @Service
-@ConditionalOnProperty(name = "fint.consumer.cache.disabled.kontaktlarergruppemedlemskap", havingValue = "false", matchIfMissing = true)
-public class KontaktlarergruppemedlemskapCacheService extends CacheService<KontaktlarergruppemedlemskapResource> {
+@ConditionalOnProperty(name = "fint.consumer.cache.disabled.varsel", havingValue = "false", matchIfMissing = true)
+public class VarselCacheService extends CacheService<VarselResource> {
 
-    public static final String MODEL = Kontaktlarergruppemedlemskap.class.getSimpleName().toLowerCase();
+    public static final String MODEL = Varsel.class.getSimpleName().toLowerCase();
 
     @Value("${fint.consumer.compatibility.fintresource:true}")
     private boolean checkFintResourceCompatibility;
@@ -51,16 +51,16 @@ public class KontaktlarergruppemedlemskapCacheService extends CacheService<Konta
     private ConsumerProps props;
 
     @Autowired
-    private KontaktlarergruppemedlemskapLinker linker;
+    private VarselLinker linker;
 
     private JavaType javaType;
 
     private ObjectMapper objectMapper;
 
-    public KontaktlarergruppemedlemskapCacheService() {
-        super(MODEL, ElevActions.GET_ALL_KONTAKTLARERGRUPPEMEDLEMSKAP, ElevActions.UPDATE_KONTAKTLARERGRUPPEMEDLEMSKAP);
+    public VarselCacheService() {
+        super(MODEL, ElevActions.GET_ALL_VARSEL, ElevActions.UPDATE_VARSEL);
         objectMapper = new ObjectMapper();
-        javaType = objectMapper.getTypeFactory().constructCollectionType(List.class, KontaktlarergruppemedlemskapResource.class);
+        javaType = objectMapper.getTypeFactory().constructCollectionType(List.class, VarselResource.class);
         objectMapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
     }
 
@@ -69,7 +69,7 @@ public class KontaktlarergruppemedlemskapCacheService extends CacheService<Konta
         props.getAssets().forEach(this::createCache);
     }
 
-    @Scheduled(initialDelayString = Constants.CACHE_INITIALDELAY_KONTAKTLARERGRUPPEMEDLEMSKAP, fixedRateString = Constants.CACHE_FIXEDRATE_KONTAKTLARERGRUPPEMEDLEMSKAP)
+    @Scheduled(initialDelayString = Constants.CACHE_INITIALDELAY_VARSEL, fixedRateString = Constants.CACHE_FIXEDRATE_VARSEL)
     public void populateCacheAll() {
         props.getAssets().forEach(this::populateCache);
     }
@@ -81,17 +81,17 @@ public class KontaktlarergruppemedlemskapCacheService extends CacheService<Konta
 
     @Override
     public void populateCache(String orgId) {
-		log.info("Populating Kontaktlarergruppemedlemskap cache for {}", orgId);
-        Event event = new Event(orgId, Constants.COMPONENT, ElevActions.GET_ALL_KONTAKTLARERGRUPPEMEDLEMSKAP, Constants.CACHE_SERVICE);
+		log.info("Populating Varsel cache for {}", orgId);
+        Event event = new Event(orgId, Constants.COMPONENT, ElevActions.GET_ALL_VARSEL, Constants.CACHE_SERVICE);
         consumerEventUtil.send(event);
     }
 
 
-    public Optional<KontaktlarergruppemedlemskapResource> getKontaktlarergruppemedlemskapBySystemId(String orgId, String systemId) {
+    public Optional<VarselResource> getVarselBySystemId(String orgId, String systemId) {
         return getOne(orgId, systemId.hashCode(),
             (resource) -> Optional
                 .ofNullable(resource)
-                .map(KontaktlarergruppemedlemskapResource::getSystemId)
+                .map(VarselResource::getSystemId)
                 .map(Identifikator::getIdentifikatorverdi)
                 .map(systemId::equals)
                 .orElse(false));
@@ -100,10 +100,10 @@ public class KontaktlarergruppemedlemskapCacheService extends CacheService<Konta
 
 	@Override
     public void onAction(Event event) {
-        List<KontaktlarergruppemedlemskapResource> data;
+        List<VarselResource> data;
         if (checkFintResourceCompatibility && fintResourceCompatibility.isFintResourceData(event.getData())) {
-            log.info("Compatibility: Converting FintResource<KontaktlarergruppemedlemskapResource> to KontaktlarergruppemedlemskapResource ...");
-            data = fintResourceCompatibility.convertResourceData(event.getData(), KontaktlarergruppemedlemskapResource.class);
+            log.info("Compatibility: Converting FintResource<VarselResource> to VarselResource ...");
+            data = fintResourceCompatibility.convertResourceData(event.getData(), VarselResource.class);
         } else {
             data = objectMapper.convertValue(event.getData(), javaType);
         }
@@ -111,9 +111,9 @@ public class KontaktlarergruppemedlemskapCacheService extends CacheService<Konta
             linker.mapLinks(resource);
             linker.resetSelfLinks(resource);
         });
-        if (ElevActions.valueOf(event.getAction()) == ElevActions.UPDATE_KONTAKTLARERGRUPPEMEDLEMSKAP) {
+        if (ElevActions.valueOf(event.getAction()) == ElevActions.UPDATE_VARSEL) {
             if (event.getResponseStatus() == ResponseStatus.ACCEPTED || event.getResponseStatus() == ResponseStatus.CONFLICT) {
-                List<CacheObject<KontaktlarergruppemedlemskapResource>> cacheObjects = data
+                List<CacheObject<VarselResource>> cacheObjects = data
                     .stream()
                     .map(i -> new CacheObject<>(i, linker.hashCodes(i)))
                     .collect(Collectors.toList());
@@ -123,7 +123,7 @@ public class KontaktlarergruppemedlemskapCacheService extends CacheService<Konta
                 log.debug("Ignoring payload for {} with response status {}", event.getOrgId(), event.getResponseStatus());
             }
         } else {
-            List<CacheObject<KontaktlarergruppemedlemskapResource>> cacheObjects = data
+            List<CacheObject<VarselResource>> cacheObjects = data
                     .stream()
                     .map(i -> new CacheObject<>(i, linker.hashCodes(i)))
                     .collect(Collectors.toList());
