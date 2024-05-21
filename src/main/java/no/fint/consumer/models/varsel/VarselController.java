@@ -1,4 +1,4 @@
-package no.fint.consumer.models.medlemskap;
+package no.fint.consumer.models.varsel;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -40,25 +40,25 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
-import no.fint.model.resource.utdanning.elev.MedlemskapResource;
-import no.fint.model.resource.utdanning.elev.MedlemskapResources;
+import no.fint.model.resource.utdanning.elev.VarselResource;
+import no.fint.model.resource.utdanning.elev.VarselResources;
 import no.fint.model.utdanning.elev.ElevActions;
 
 @Slf4j
-@Api(tags = {"Medlemskap"})
+@Api(tags = {"Varsel"})
 @CrossOrigin
 @RestController
-@RequestMapping(name = "Medlemskap", value = RestEndpoints.MEDLEMSKAP, produces = {FintRelationsMediaType.APPLICATION_HAL_JSON_VALUE, MediaType.APPLICATION_JSON_UTF8_VALUE})
-public class MedlemskapController {
+@RequestMapping(name = "Varsel", value = RestEndpoints.VARSEL, produces = {FintRelationsMediaType.APPLICATION_HAL_JSON_VALUE, MediaType.APPLICATION_JSON_UTF8_VALUE})
+public class VarselController {
 
     @Autowired(required = false)
-    private MedlemskapCacheService cacheService;
+    private VarselCacheService cacheService;
 
     @Autowired
     private FintAuditService fintAuditService;
 
     @Autowired
-    private MedlemskapLinker linker;
+    private VarselLinker linker;
 
     @Autowired
     private ConsumerProps props;
@@ -78,7 +78,7 @@ public class MedlemskapController {
     @GetMapping("/last-updated")
     public Map<String, String> getLastUpdated(@RequestHeader(name = HeaderConstants.ORG_ID, required = false) String orgId) {
         if (cacheService == null) {
-            throw new CacheDisabledException("Medlemskap cache is disabled.");
+            throw new CacheDisabledException("Varsel cache is disabled.");
         }
         if (props.isOverrideOrgId() || orgId == null) {
             orgId = props.getDefaultOrgId();
@@ -90,7 +90,7 @@ public class MedlemskapController {
     @GetMapping("/cache/size")
     public ImmutableMap<String, Integer> getCacheSize(@RequestHeader(name = HeaderConstants.ORG_ID, required = false) String orgId) {
         if (cacheService == null) {
-            throw new CacheDisabledException("Medlemskap cache is disabled.");
+            throw new CacheDisabledException("Varsel cache is disabled.");
         }
         if (props.isOverrideOrgId() || orgId == null) {
             orgId = props.getDefaultOrgId();
@@ -99,7 +99,7 @@ public class MedlemskapController {
     }
 
     @GetMapping
-    public MedlemskapResources getMedlemskap(
+    public VarselResources getVarsel(
             @RequestHeader(name = HeaderConstants.ORG_ID, required = false) String orgId,
             @RequestHeader(name = HeaderConstants.CLIENT, required = false) String client,
             @RequestParam(defaultValue = "0") long sinceTimeStamp,
@@ -107,7 +107,7 @@ public class MedlemskapController {
             @RequestParam(defaultValue = "0") int offset,
             HttpServletRequest request) {
         if (cacheService == null) {
-            throw new CacheDisabledException("Medlemskap cache is disabled.");
+            throw new CacheDisabledException("Varsel cache is disabled.");
         }
         if (props.isOverrideOrgId() || orgId == null) {
             orgId = props.getDefaultOrgId();
@@ -117,7 +117,7 @@ public class MedlemskapController {
         }
         log.debug("OrgId: {}, Client: {}", orgId, client);
 
-        Event event = new Event(orgId, Constants.COMPONENT, ElevActions.GET_ALL_MEDLEMSKAP, client);
+        Event event = new Event(orgId, Constants.COMPONENT, ElevActions.GET_ALL_VARSEL, client);
         event.setOperation(Operation.READ);
         if (StringUtils.isNotBlank(request.getQueryString())) {
             event.setQuery("?" + request.getQueryString());
@@ -125,7 +125,7 @@ public class MedlemskapController {
         fintAuditService.audit(event);
         fintAuditService.audit(event, Status.CACHE);
 
-        Stream<MedlemskapResource> resources;
+        Stream<VarselResource> resources;
         if (size > 0 && offset >= 0 && sinceTimeStamp > 0) {
             resources = cacheService.streamSliceSince(orgId, sinceTimeStamp, offset, size);
         } else if (size > 0 && offset >= 0) {
@@ -143,7 +143,7 @@ public class MedlemskapController {
 
 
     @GetMapping("/systemid/{id:.+}")
-    public MedlemskapResource getMedlemskapBySystemId(
+    public VarselResource getVarselBySystemId(
             @PathVariable String id,
             @RequestHeader(name = HeaderConstants.ORG_ID, required = false) String orgId,
             @RequestHeader(name = HeaderConstants.CLIENT, required = false) String client) throws InterruptedException {
@@ -155,7 +155,7 @@ public class MedlemskapController {
         }
         log.debug("systemId: {}, OrgId: {}, Client: {}", id, orgId, client);
 
-        Event event = new Event(orgId, Constants.COMPONENT, ElevActions.GET_MEDLEMSKAP, client);
+        Event event = new Event(orgId, Constants.COMPONENT, ElevActions.GET_VARSEL, client);
         event.setOperation(Operation.READ);
         event.setQuery("systemId/" + id);
 
@@ -163,11 +163,11 @@ public class MedlemskapController {
             fintAuditService.audit(event);
             fintAuditService.audit(event, Status.CACHE);
 
-            Optional<MedlemskapResource> medlemskap = cacheService.getMedlemskapBySystemId(orgId, id);
+            Optional<VarselResource> varsel = cacheService.getVarselBySystemId(orgId, id);
 
             fintAuditService.audit(event, Status.CACHE_RESPONSE, Status.SENT_TO_CLIENT);
 
-            return medlemskap.map(linker::toResource).orElseThrow(() -> new EntityNotFoundException(id));
+            return varsel.map(linker::toResource).orElseThrow(() -> new EntityNotFoundException(id));
 
         } else {
             BlockingQueue<Event> queue = synchronousEvents.register(event);
@@ -178,11 +178,11 @@ public class MedlemskapController {
             if (response.getData() == null ||
                     response.getData().isEmpty()) throw new EntityNotFoundException(id);
 
-            MedlemskapResource medlemskap = objectMapper.convertValue(response.getData().get(0), MedlemskapResource.class);
+            VarselResource varsel = objectMapper.convertValue(response.getData().get(0), VarselResource.class);
 
             fintAuditService.audit(response, Status.SENT_TO_CLIENT);
 
-            return linker.toResource(medlemskap);
+            return linker.toResource(varsel);
         }    
     }
 
