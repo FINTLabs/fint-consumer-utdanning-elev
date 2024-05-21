@@ -137,7 +137,10 @@ public class ElevCacheService extends CacheService<ElevResource> {
         } else {
             data = objectMapper.convertValue(event.getData(), javaType);
         }
-        data.forEach(linker::mapLinks);
+        data.forEach(resource -> {
+            linker.mapLinks(resource);
+            linker.resetSelfLinks(resource);
+        });
         if (ElevActions.valueOf(event.getAction()) == ElevActions.UPDATE_ELEV) {
             if (event.getResponseStatus() == ResponseStatus.ACCEPTED || event.getResponseStatus() == ResponseStatus.CONFLICT) {
                 List<CacheObject<ElevResource>> cacheObjects = data

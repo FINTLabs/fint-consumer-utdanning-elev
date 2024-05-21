@@ -107,7 +107,10 @@ public class PersongruppemedlemskapCacheService extends CacheService<Persongrupp
         } else {
             data = objectMapper.convertValue(event.getData(), javaType);
         }
-        data.forEach(linker::mapLinks);
+        data.forEach(resource -> {
+            linker.mapLinks(resource);
+            linker.resetSelfLinks(resource);
+        });
         if (ElevActions.valueOf(event.getAction()) == ElevActions.UPDATE_PERSONGRUPPEMEDLEMSKAP) {
             if (event.getResponseStatus() == ResponseStatus.ACCEPTED || event.getResponseStatus() == ResponseStatus.CONFLICT) {
                 List<CacheObject<PersongruppemedlemskapResource>> cacheObjects = data

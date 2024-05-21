@@ -107,7 +107,10 @@ public class UndervisningsforholdCacheService extends CacheService<Undervisnings
         } else {
             data = objectMapper.convertValue(event.getData(), javaType);
         }
-        data.forEach(linker::mapLinks);
+        data.forEach(resource -> {
+            linker.mapLinks(resource);
+            linker.resetSelfLinks(resource);
+        });
         if (ElevActions.valueOf(event.getAction()) == ElevActions.UPDATE_UNDERVISNINGSFORHOLD) {
             if (event.getResponseStatus() == ResponseStatus.ACCEPTED || event.getResponseStatus() == ResponseStatus.CONFLICT) {
                 List<CacheObject<UndervisningsforholdResource>> cacheObjects = data
