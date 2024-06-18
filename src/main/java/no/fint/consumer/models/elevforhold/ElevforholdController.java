@@ -182,7 +182,7 @@ public class ElevforholdController {
 
             fintAuditService.audit(response, Status.SENT_TO_CLIENT);
 
-            return linker.toResource(elevforhold);
+            return linker.mapAndResetLinks(elevforhold);
         }    
     }
 

@@ -182,7 +182,7 @@ public class SkoleressursController {
 
             fintAuditService.audit(response, Status.SENT_TO_CLIENT);
 
-            return linker.toResource(skoleressurs);
+            return linker.mapAndResetLinks(skoleressurs);
         }    
     }
 
@@ -226,7 +226,7 @@ public class SkoleressursController {
 
             fintAuditService.audit(response, Status.SENT_TO_CLIENT);
 
-            return linker.toResource(skoleressurs);
+            return linker.mapAndResetLinks(skoleressurs);
         }    
     }
 

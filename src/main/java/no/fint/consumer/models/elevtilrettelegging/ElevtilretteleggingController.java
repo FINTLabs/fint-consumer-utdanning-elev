@@ -182,7 +182,7 @@ public class ElevtilretteleggingController {
 
             fintAuditService.audit(response, Status.SENT_TO_CLIENT);
 
-            return linker.toResource(elevtilrettelegging);
+            return linker.mapAndResetLinks(elevtilrettelegging);
         }    
     }
 
