@@ -182,7 +182,7 @@ public class VarselController {
 
             fintAuditService.audit(response, Status.SENT_TO_CLIENT);
 
-            return linker.toResource(varsel);
+            return linker.mapAndResetLinks(varsel);
         }    
     }
 
