@@ -107,10 +107,7 @@ public class MedlemskapCacheService extends CacheService<MedlemskapResource> {
         } else {
             data = objectMapper.convertValue(event.getData(), javaType);
         }
-        data.forEach(resource -> {
-            linker.mapLinks(resource);
-            linker.resetSelfLinks(resource);
-        });
+        data.forEach(linker::mapLinks);
         if (ElevActions.valueOf(event.getAction()) == ElevActions.UPDATE_MEDLEMSKAP) {
             if (event.getResponseStatus() == ResponseStatus.ACCEPTED || event.getResponseStatus() == ResponseStatus.CONFLICT) {
                 List<CacheObject<MedlemskapResource>> cacheObjects = data

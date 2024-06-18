@@ -182,7 +182,7 @@ public class PersongruppeController {
 
             fintAuditService.audit(response, Status.SENT_TO_CLIENT);
 
-            return linker.toResource(persongruppe);
+            return linker.mapAndResetLinks(persongruppe);
         }    
     }
 
