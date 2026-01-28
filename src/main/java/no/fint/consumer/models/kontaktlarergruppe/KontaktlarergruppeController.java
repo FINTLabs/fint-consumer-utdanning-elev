@@ -43,9 +43,9 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
-import no.fint.model.resource.utdanning.elev.KontaktlarergruppeResource;
-import no.fint.model.resource.utdanning.elev.KontaktlarergruppeResources;
-import no.fint.model.utdanning.elev.ElevActions;
+import no.novari.fint.model.resource.utdanning.elev.KontaktlarergruppeResource;
+import no.novari.fint.model.resource.utdanning.elev.KontaktlarergruppeResources;
+import no.novari.fint.model.utdanning.elev.ElevActions;
 
 @Slf4j
 @Api(tags = {"Kontaktlarergruppe"})

@@ -1,4 +1,4 @@
-package no.fint.consumer.models.basisgruppemedlemskap;
+package no.fint.consumer.models.klasse;
 
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -26,17 +26,17 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import no.fint.model.utdanning.elev.Basisgruppemedlemskap;
-import no.fint.model.resource.utdanning.elev.BasisgruppemedlemskapResource;
-import no.fint.model.utdanning.elev.ElevActions;
-import no.fint.model.felles.kompleksedatatyper.Identifikator;
+import no.novari.fint.model.utdanning.elev.Klasse;
+import no.novari.fint.model.resource.utdanning.elev.KlasseResource;
+import no.novari.fint.model.utdanning.elev.ElevActions;
+import no.novari.fint.model.felles.kompleksedatatyper.Identifikator;
 
 @Slf4j
 @Service
-@ConditionalOnProperty(name = "fint.consumer.cache.disabled.basisgruppemedlemskap", havingValue = "false", matchIfMissing = true)
-public class BasisgruppemedlemskapCacheService extends CacheService<BasisgruppemedlemskapResource> {
+@ConditionalOnProperty(name = "fint.consumer.cache.disabled.klasse", havingValue = "false", matchIfMissing = true)
+public class KlasseCacheService extends CacheService<KlasseResource> {
 
-    public static final String MODEL = Basisgruppemedlemskap.class.getSimpleName().toLowerCase();
+    public static final String MODEL = Klasse.class.getSimpleName().toLowerCase();
 
     @Value("${fint.consumer.compatibility.fintresource:true}")
     private boolean checkFintResourceCompatibility;
@@ -51,16 +51,16 @@ public class BasisgruppemedlemskapCacheService extends CacheService<Basisgruppem
     private ConsumerProps props;
 
     @Autowired
-    private BasisgruppemedlemskapLinker linker;
+    private KlasseLinker linker;
 
     private JavaType javaType;
 
     private ObjectMapper objectMapper;
 
-    public BasisgruppemedlemskapCacheService() {
-        super(MODEL, ElevActions.GET_ALL_BASISGRUPPEMEDLEMSKAP, ElevActions.UPDATE_BASISGRUPPEMEDLEMSKAP);
+    public KlasseCacheService() {
+        super(MODEL, ElevActions.GET_ALL_KLASSE, ElevActions.UPDATE_KLASSE);
         objectMapper = new ObjectMapper();
-        javaType = objectMapper.getTypeFactory().constructCollectionType(List.class, BasisgruppemedlemskapResource.class);
+        javaType = objectMapper.getTypeFactory().constructCollectionType(List.class, KlasseResource.class);
         objectMapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
     }
 
@@ -69,7 +69,7 @@ public class BasisgruppemedlemskapCacheService extends CacheService<Basisgruppem
         props.getAssets().forEach(this::createCache);
     }
 
-    @Scheduled(initialDelayString = Constants.CACHE_INITIALDELAY_BASISGRUPPEMEDLEMSKAP, fixedRateString = Constants.CACHE_FIXEDRATE_BASISGRUPPEMEDLEMSKAP)
+    @Scheduled(initialDelayString = Constants.CACHE_INITIALDELAY_KLASSE, fixedRateString = Constants.CACHE_FIXEDRATE_KLASSE)
     public void populateCacheAll() {
         props.getAssets().forEach(this::populateCache);
     }
@@ -81,17 +81,17 @@ public class BasisgruppemedlemskapCacheService extends CacheService<Basisgruppem
 
     @Override
     public void populateCache(String orgId) {
-		log.info("Populating Basisgruppemedlemskap cache for {}", orgId);
-        Event event = new Event(orgId, Constants.COMPONENT, ElevActions.GET_ALL_BASISGRUPPEMEDLEMSKAP, Constants.CACHE_SERVICE);
+		log.info("Populating Klasse cache for {}", orgId);
+        Event event = new Event(orgId, Constants.COMPONENT, ElevActions.GET_ALL_KLASSE, Constants.CACHE_SERVICE);
         consumerEventUtil.send(event);
     }
 
 
-    public Optional<BasisgruppemedlemskapResource> getBasisgruppemedlemskapBySystemId(String orgId, String systemId) {
+    public Optional<KlasseResource> getKlasseBySystemId(String orgId, String systemId) {
         return getOne(orgId, systemId.hashCode(),
             (resource) -> Optional
                 .ofNullable(resource)
-                .map(BasisgruppemedlemskapResource::getSystemId)
+                .map(KlasseResource::getSystemId)
                 .map(Identifikator::getIdentifikatorverdi)
                 .map(systemId::equals)
                 .orElse(false));
@@ -100,10 +100,10 @@ public class BasisgruppemedlemskapCacheService extends CacheService<Basisgruppem
 
 	@Override
     public void onAction(Event event) {
-        List<BasisgruppemedlemskapResource> data;
+        List<KlasseResource> data;
         if (checkFintResourceCompatibility && fintResourceCompatibility.isFintResourceData(event.getData())) {
-            log.info("Compatibility: Converting FintResource<BasisgruppemedlemskapResource> to BasisgruppemedlemskapResource ...");
-            data = fintResourceCompatibility.convertResourceData(event.getData(), BasisgruppemedlemskapResource.class);
+            log.info("Compatibility: Converting FintResource<KlasseResource> to KlasseResource ...");
+            data = fintResourceCompatibility.convertResourceData(event.getData(), KlasseResource.class);
         } else {
             data = objectMapper.convertValue(event.getData(), javaType);
         }
@@ -111,9 +111,9 @@ public class BasisgruppemedlemskapCacheService extends CacheService<Basisgruppem
             linker.mapLinks(resource);
             linker.resetSelfLinks(resource);
         });
-        if (ElevActions.valueOf(event.getAction()) == ElevActions.UPDATE_BASISGRUPPEMEDLEMSKAP) {
+        if (ElevActions.valueOf(event.getAction()) == ElevActions.UPDATE_KLASSE) {
             if (event.getResponseStatus() == ResponseStatus.ACCEPTED || event.getResponseStatus() == ResponseStatus.CONFLICT) {
-                List<CacheObject<BasisgruppemedlemskapResource>> cacheObjects = data
+                List<CacheObject<KlasseResource>> cacheObjects = data
                     .stream()
                     .map(i -> new CacheObject<>(i, linker.hashCodes(i)))
                     .collect(Collectors.toList());
@@ -123,7 +123,7 @@ public class BasisgruppemedlemskapCacheService extends CacheService<Basisgruppem
                 log.debug("Ignoring payload for {} with response status {}", event.getOrgId(), event.getResponseStatus());
             }
         } else {
-            List<CacheObject<BasisgruppemedlemskapResource>> cacheObjects = data
+            List<CacheObject<KlasseResource>> cacheObjects = data
                     .stream()
                     .map(i -> new CacheObject<>(i, linker.hashCodes(i)))
                     .collect(Collectors.toList());

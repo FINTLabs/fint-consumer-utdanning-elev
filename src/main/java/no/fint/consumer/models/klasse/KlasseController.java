@@ -1,4 +1,4 @@
-package no.fint.consumer.models.basisgruppemedlemskap;
+package no.fint.consumer.models.klasse;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -43,27 +43,27 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
-import no.fint.model.resource.utdanning.elev.BasisgruppemedlemskapResource;
-import no.fint.model.resource.utdanning.elev.BasisgruppemedlemskapResources;
-import no.fint.model.utdanning.elev.ElevActions;
+import no.novari.fint.model.resource.utdanning.elev.KlasseResource;
+import no.novari.fint.model.resource.utdanning.elev.KlasseResources;
+import no.novari.fint.model.utdanning.elev.ElevActions;
 
 @Slf4j
-@Api(tags = {"Basisgruppemedlemskap"})
+@Api(tags = {"Klasse"})
 @CrossOrigin
 @RestController
-@RequestMapping(name = "Basisgruppemedlemskap", value = RestEndpoints.BASISGRUPPEMEDLEMSKAP, produces = {FintRelationsMediaType.APPLICATION_HAL_JSON_VALUE, MediaType.APPLICATION_JSON_UTF8_VALUE})
-public class BasisgruppemedlemskapController {
+@RequestMapping(name = "Klasse", value = RestEndpoints.KLASSE, produces = {FintRelationsMediaType.APPLICATION_HAL_JSON_VALUE, MediaType.APPLICATION_JSON_UTF8_VALUE})
+public class KlasseController {
 
     private static final String ODATA_FILTER_QUERY_OPTION = "$filter=";
 
     @Autowired(required = false)
-    private BasisgruppemedlemskapCacheService cacheService;
+    private KlasseCacheService cacheService;
 
     @Autowired
     private FintAuditService fintAuditService;
 
     @Autowired
-    private BasisgruppemedlemskapLinker linker;
+    private KlasseLinker linker;
 
     @Autowired
     private ConsumerProps props;
@@ -86,7 +86,7 @@ public class BasisgruppemedlemskapController {
     @GetMapping("/last-updated")
     public Map<String, String> getLastUpdated(@RequestHeader(name = HeaderConstants.ORG_ID, required = false) String orgId) {
         if (cacheService == null) {
-            throw new CacheDisabledException("Basisgruppemedlemskap cache is disabled.");
+            throw new CacheDisabledException("Klasse cache is disabled.");
         }
         if (props.isOverrideOrgId() || orgId == null) {
             orgId = props.getDefaultOrgId();
@@ -98,7 +98,7 @@ public class BasisgruppemedlemskapController {
     @GetMapping("/cache/size")
     public ImmutableMap<String, Integer> getCacheSize(@RequestHeader(name = HeaderConstants.ORG_ID, required = false) String orgId) {
         if (cacheService == null) {
-            throw new CacheDisabledException("Basisgruppemedlemskap cache is disabled.");
+            throw new CacheDisabledException("Klasse cache is disabled.");
         }
         if (props.isOverrideOrgId() || orgId == null) {
             orgId = props.getDefaultOrgId();
@@ -107,7 +107,7 @@ public class BasisgruppemedlemskapController {
     }
 
     @GetMapping
-    public BasisgruppemedlemskapResources getBasisgruppemedlemskap(
+    public KlasseResources getKlasse(
             @RequestHeader(name = HeaderConstants.ORG_ID, required = false) String orgId,
             @RequestHeader(name = HeaderConstants.CLIENT, required = false) String client,
             @RequestParam(defaultValue = "0") long sinceTimeStamp,
@@ -117,9 +117,9 @@ public class BasisgruppemedlemskapController {
             HttpServletRequest request) throws InterruptedException {
         if (cacheService == null) {
             if (StringUtils.isNotBlank($filter)) {
-                return getBasisgruppemedlemskapByOdataFilter(client, orgId, $filter);
+                return getKlasseByOdataFilter(client, orgId, $filter);
             }
-            throw new CacheDisabledException("Basisgruppemedlemskap cache is disabled.");
+            throw new CacheDisabledException("Klasse cache is disabled.");
         }
         if (props.isOverrideOrgId() || orgId == null) {
             orgId = props.getDefaultOrgId();
@@ -129,7 +129,7 @@ public class BasisgruppemedlemskapController {
         }
         log.debug("OrgId: {}, Client: {}", orgId, client);
 
-        Event event = new Event(orgId, Constants.COMPONENT, ElevActions.GET_ALL_BASISGRUPPEMEDLEMSKAP, client);
+        Event event = new Event(orgId, Constants.COMPONENT, ElevActions.GET_ALL_KLASSE, client);
         event.setOperation(Operation.READ);
         if (StringUtils.isNotBlank(request.getQueryString())) {
             event.setQuery("?" + request.getQueryString());
@@ -137,7 +137,7 @@ public class BasisgruppemedlemskapController {
         fintAuditService.audit(event);
         fintAuditService.audit(event, Status.CACHE);
 
-        Stream<BasisgruppemedlemskapResource> resources;
+        Stream<KlasseResource> resources;
         if (size > 0 && offset >= 0 && sinceTimeStamp > 0) {
             resources = cacheService.streamSliceSince(orgId, sinceTimeStamp, offset, size);
         } else if (size > 0 && offset >= 0) {
@@ -154,7 +154,7 @@ public class BasisgruppemedlemskapController {
     }
     
     @PostMapping("/$query")
-    public BasisgruppemedlemskapResources getBasisgruppemedlemskapByQuery(
+    public KlasseResources getKlasseByQuery(
             @RequestHeader(name = HeaderConstants.ORG_ID, required = false)   String orgId,
             @RequestHeader(name = HeaderConstants.CLIENT, required = false) String client,
             @RequestParam(defaultValue = "0") long sinceTimeStamp,
@@ -163,10 +163,10 @@ public class BasisgruppemedlemskapController {
             @RequestBody(required = false) String query,
             HttpServletRequest request
     ) throws InterruptedException {
-        return getBasisgruppemedlemskap(orgId, client, sinceTimeStamp, size, offset, query, request);
+        return getKlasse(orgId, client, sinceTimeStamp, size, offset, query, request);
     }
 
-    private BasisgruppemedlemskapResources getBasisgruppemedlemskapByOdataFilter(
+    private KlasseResources getKlasseByOdataFilter(
         String client, String orgId, String $filter
     ) throws InterruptedException {
         if (!fintFilterService.validate($filter))
@@ -177,7 +177,7 @@ public class BasisgruppemedlemskapController {
     
         Event event = new Event(
                 orgId, Constants.COMPONENT,
-                ElevActions.GET_BASISGRUPPEMEDLEMSKAP, client);
+                ElevActions.GET_KLASSE, client);
         event.setOperation(Operation.READ);
         event.setQuery(ODATA_FILTER_QUERY_OPTION.concat($filter));
     
@@ -186,11 +186,11 @@ public class BasisgruppemedlemskapController {
     
         Event response = EventResponses.handle(queue.poll(5, TimeUnit.MINUTES));
         if (response.getData() == null || response.getData().isEmpty())
-            return new BasisgruppemedlemskapResources();
+            return new KlasseResources();
     
-        ArrayList<BasisgruppemedlemskapResource> list = objectMapper.convertValue(
+        ArrayList<KlasseResource> list = objectMapper.convertValue(
                 response.getData(),
-                new TypeReference<ArrayList<BasisgruppemedlemskapResource>>() {});
+                new TypeReference<ArrayList<KlasseResource>>() {});
         fintAuditService.audit(response, Status.SENT_TO_CLIENT);
         list.forEach(r -> linker.mapAndResetLinks(r));
         return linker.toResources(list);
@@ -198,7 +198,7 @@ public class BasisgruppemedlemskapController {
 
 
     @GetMapping("/systemid/{id:.+}")
-    public BasisgruppemedlemskapResource getBasisgruppemedlemskapBySystemId(
+    public KlasseResource getKlasseBySystemId(
             @PathVariable String id,
             @RequestHeader(name = HeaderConstants.ORG_ID, required = false) String orgId,
             @RequestHeader(name = HeaderConstants.CLIENT, required = false) String client) throws InterruptedException {
@@ -210,7 +210,7 @@ public class BasisgruppemedlemskapController {
         }
         log.debug("systemId: {}, OrgId: {}, Client: {}", id, orgId, client);
 
-        Event event = new Event(orgId, Constants.COMPONENT, ElevActions.GET_BASISGRUPPEMEDLEMSKAP, client);
+        Event event = new Event(orgId, Constants.COMPONENT, ElevActions.GET_KLASSE, client);
         event.setOperation(Operation.READ);
         event.setQuery("systemId/" + id);
 
@@ -218,11 +218,11 @@ public class BasisgruppemedlemskapController {
             fintAuditService.audit(event);
             fintAuditService.audit(event, Status.CACHE);
 
-            Optional<BasisgruppemedlemskapResource> basisgruppemedlemskap = cacheService.getBasisgruppemedlemskapBySystemId(orgId, id);
+            Optional<KlasseResource> klasse = cacheService.getKlasseBySystemId(orgId, id);
 
             fintAuditService.audit(event, Status.CACHE_RESPONSE, Status.SENT_TO_CLIENT);
 
-            return basisgruppemedlemskap.map(linker::toResource).orElseThrow(() -> new EntityNotFoundException(id));
+            return klasse.map(linker::toResource).orElseThrow(() -> new EntityNotFoundException(id));
 
         } else {
             BlockingQueue<Event> queue = synchronousEvents.register(event);
@@ -233,11 +233,11 @@ public class BasisgruppemedlemskapController {
             if (response.getData() == null ||
                     response.getData().isEmpty()) throw new EntityNotFoundException(id);
 
-            BasisgruppemedlemskapResource basisgruppemedlemskap = objectMapper.convertValue(response.getData().get(0), BasisgruppemedlemskapResource.class);
+            KlasseResource klasse = objectMapper.convertValue(response.getData().get(0), KlasseResource.class);
 
             fintAuditService.audit(response, Status.SENT_TO_CLIENT);
 
-            return linker.mapAndResetLinks(basisgruppemedlemskap);
+            return linker.mapAndResetLinks(klasse);
         }    
     }
 

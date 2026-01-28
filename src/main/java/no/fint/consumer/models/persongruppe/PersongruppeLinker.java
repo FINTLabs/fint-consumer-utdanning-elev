@@ -1,7 +1,7 @@
 package no.fint.consumer.models.persongruppe;
 
-import no.fint.model.resource.utdanning.elev.PersongruppeResource;
-import no.fint.model.resource.utdanning.elev.PersongruppeResources;
+import no.novari.fint.model.resource.utdanning.elev.PersongruppeResource;
+import no.novari.fint.model.resource.utdanning.elev.PersongruppeResources;
 import no.fint.relations.FintLinker;
 import org.springframework.stereotype.Component;
 

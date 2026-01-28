@@ -1,7 +1,7 @@
 package no.fint.consumer.models.undervisningsforhold;
 
-import no.fint.model.resource.utdanning.elev.UndervisningsforholdResource;
-import no.fint.model.resource.utdanning.elev.UndervisningsforholdResources;
+import no.novari.fint.model.resource.utdanning.elev.UndervisningsforholdResource;
+import no.novari.fint.model.resource.utdanning.elev.UndervisningsforholdResources;
 import no.fint.relations.FintLinker;
 import org.springframework.stereotype.Component;
 

@@ -1,7 +1,7 @@
 package no.fint.consumer.models.elevtilrettelegging;
 
-import no.fint.model.resource.utdanning.elev.ElevtilretteleggingResource;
-import no.fint.model.resource.utdanning.elev.ElevtilretteleggingResources;
+import no.novari.fint.model.resource.utdanning.elev.ElevtilretteleggingResource;
+import no.novari.fint.model.resource.utdanning.elev.ElevtilretteleggingResources;
 import no.fint.relations.FintLinker;
 import org.springframework.stereotype.Component;
 

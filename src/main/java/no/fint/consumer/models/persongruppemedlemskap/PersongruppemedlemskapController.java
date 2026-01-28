@@ -43,9 +43,9 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
-import no.fint.model.resource.utdanning.elev.PersongruppemedlemskapResource;
-import no.fint.model.resource.utdanning.elev.PersongruppemedlemskapResources;
-import no.fint.model.utdanning.elev.ElevActions;
+import no.novari.fint.model.resource.utdanning.elev.PersongruppemedlemskapResource;
+import no.novari.fint.model.resource.utdanning.elev.PersongruppemedlemskapResources;
+import no.novari.fint.model.utdanning.elev.ElevActions;
 
 @Slf4j
 @Api(tags = {"Persongruppemedlemskap"})

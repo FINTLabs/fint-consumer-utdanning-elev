@@ -1,4 +1,4 @@
-package no.fint.consumer.models.medlemskap;
+package no.fint.consumer.models.klassemedlemskap;
 
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -26,17 +26,17 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import no.fint.model.utdanning.elev.Medlemskap;
-import no.fint.model.resource.utdanning.elev.MedlemskapResource;
-import no.fint.model.utdanning.elev.ElevActions;
-import no.fint.model.felles.kompleksedatatyper.Identifikator;
+import no.novari.fint.model.utdanning.elev.Klassemedlemskap;
+import no.novari.fint.model.resource.utdanning.elev.KlassemedlemskapResource;
+import no.novari.fint.model.utdanning.elev.ElevActions;
+import no.novari.fint.model.felles.kompleksedatatyper.Identifikator;
 
 @Slf4j
 @Service
-@ConditionalOnProperty(name = "fint.consumer.cache.disabled.medlemskap", havingValue = "false", matchIfMissing = true)
-public class MedlemskapCacheService extends CacheService<MedlemskapResource> {
+@ConditionalOnProperty(name = "fint.consumer.cache.disabled.klassemedlemskap", havingValue = "false", matchIfMissing = true)
+public class KlassemedlemskapCacheService extends CacheService<KlassemedlemskapResource> {
 
-    public static final String MODEL = Medlemskap.class.getSimpleName().toLowerCase();
+    public static final String MODEL = Klassemedlemskap.class.getSimpleName().toLowerCase();
 
     @Value("${fint.consumer.compatibility.fintresource:true}")
     private boolean checkFintResourceCompatibility;
@@ -51,16 +51,16 @@ public class MedlemskapCacheService extends CacheService<MedlemskapResource> {
     private ConsumerProps props;
 
     @Autowired
-    private MedlemskapLinker linker;
+    private KlassemedlemskapLinker linker;
 
     private JavaType javaType;
 
     private ObjectMapper objectMapper;
 
-    public MedlemskapCacheService() {
-        super(MODEL, ElevActions.GET_ALL_MEDLEMSKAP, ElevActions.UPDATE_MEDLEMSKAP);
+    public KlassemedlemskapCacheService() {
+        super(MODEL, ElevActions.GET_ALL_KLASSEMEDLEMSKAP, ElevActions.UPDATE_KLASSEMEDLEMSKAP);
         objectMapper = new ObjectMapper();
-        javaType = objectMapper.getTypeFactory().constructCollectionType(List.class, MedlemskapResource.class);
+        javaType = objectMapper.getTypeFactory().constructCollectionType(List.class, KlassemedlemskapResource.class);
         objectMapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
     }
 
@@ -69,7 +69,7 @@ public class MedlemskapCacheService extends CacheService<MedlemskapResource> {
         props.getAssets().forEach(this::createCache);
     }
 
-    @Scheduled(initialDelayString = Constants.CACHE_INITIALDELAY_MEDLEMSKAP, fixedRateString = Constants.CACHE_FIXEDRATE_MEDLEMSKAP)
+    @Scheduled(initialDelayString = Constants.CACHE_INITIALDELAY_KLASSEMEDLEMSKAP, fixedRateString = Constants.CACHE_FIXEDRATE_KLASSEMEDLEMSKAP)
     public void populateCacheAll() {
         props.getAssets().forEach(this::populateCache);
     }
@@ -81,17 +81,17 @@ public class MedlemskapCacheService extends CacheService<MedlemskapResource> {
 
     @Override
     public void populateCache(String orgId) {
-		log.info("Populating Medlemskap cache for {}", orgId);
-        Event event = new Event(orgId, Constants.COMPONENT, ElevActions.GET_ALL_MEDLEMSKAP, Constants.CACHE_SERVICE);
+		log.info("Populating Klassemedlemskap cache for {}", orgId);
+        Event event = new Event(orgId, Constants.COMPONENT, ElevActions.GET_ALL_KLASSEMEDLEMSKAP, Constants.CACHE_SERVICE);
         consumerEventUtil.send(event);
     }
 
 
-    public Optional<MedlemskapResource> getMedlemskapBySystemId(String orgId, String systemId) {
+    public Optional<KlassemedlemskapResource> getKlassemedlemskapBySystemId(String orgId, String systemId) {
         return getOne(orgId, systemId.hashCode(),
             (resource) -> Optional
                 .ofNullable(resource)
-                .map(MedlemskapResource::getSystemId)
+                .map(KlassemedlemskapResource::getSystemId)
                 .map(Identifikator::getIdentifikatorverdi)
                 .map(systemId::equals)
                 .orElse(false));
@@ -100,10 +100,10 @@ public class MedlemskapCacheService extends CacheService<MedlemskapResource> {
 
 	@Override
     public void onAction(Event event) {
-        List<MedlemskapResource> data;
+        List<KlassemedlemskapResource> data;
         if (checkFintResourceCompatibility && fintResourceCompatibility.isFintResourceData(event.getData())) {
-            log.info("Compatibility: Converting FintResource<MedlemskapResource> to MedlemskapResource ...");
-            data = fintResourceCompatibility.convertResourceData(event.getData(), MedlemskapResource.class);
+            log.info("Compatibility: Converting FintResource<KlassemedlemskapResource> to KlassemedlemskapResource ...");
+            data = fintResourceCompatibility.convertResourceData(event.getData(), KlassemedlemskapResource.class);
         } else {
             data = objectMapper.convertValue(event.getData(), javaType);
         }
@@ -111,9 +111,9 @@ public class MedlemskapCacheService extends CacheService<MedlemskapResource> {
             linker.mapLinks(resource);
             linker.resetSelfLinks(resource);
         });
-        if (ElevActions.valueOf(event.getAction()) == ElevActions.UPDATE_MEDLEMSKAP) {
+        if (ElevActions.valueOf(event.getAction()) == ElevActions.UPDATE_KLASSEMEDLEMSKAP) {
             if (event.getResponseStatus() == ResponseStatus.ACCEPTED || event.getResponseStatus() == ResponseStatus.CONFLICT) {
-                List<CacheObject<MedlemskapResource>> cacheObjects = data
+                List<CacheObject<KlassemedlemskapResource>> cacheObjects = data
                     .stream()
                     .map(i -> new CacheObject<>(i, linker.hashCodes(i)))
                     .collect(Collectors.toList());
@@ -123,7 +123,7 @@ public class MedlemskapCacheService extends CacheService<MedlemskapResource> {
                 log.debug("Ignoring payload for {} with response status {}", event.getOrgId(), event.getResponseStatus());
             }
         } else {
-            List<CacheObject<MedlemskapResource>> cacheObjects = data
+            List<CacheObject<KlassemedlemskapResource>> cacheObjects = data
                     .stream()
                     .map(i -> new CacheObject<>(i, linker.hashCodes(i)))
                     .collect(Collectors.toList());

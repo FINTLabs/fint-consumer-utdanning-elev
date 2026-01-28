@@ -1,7 +1,7 @@
 package no.fint.consumer.models.kontaktlarergruppemedlemskap;
 
-import no.fint.model.resource.utdanning.elev.KontaktlarergruppemedlemskapResource;
-import no.fint.model.resource.utdanning.elev.KontaktlarergruppemedlemskapResources;
+import no.novari.fint.model.resource.utdanning.elev.KontaktlarergruppemedlemskapResource;
+import no.novari.fint.model.resource.utdanning.elev.KontaktlarergruppemedlemskapResources;
 import no.fint.relations.FintLinker;
 import org.springframework.stereotype.Component;
 

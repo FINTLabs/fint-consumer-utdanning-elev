@@ -1,4 +1,4 @@
-package no.fint.consumer.models.medlemskap;
+package no.fint.consumer.models.klassemedlemskap;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -43,27 +43,27 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
-import no.fint.model.resource.utdanning.elev.MedlemskapResource;
-import no.fint.model.resource.utdanning.elev.MedlemskapResources;
-import no.fint.model.utdanning.elev.ElevActions;
+import no.novari.fint.model.resource.utdanning.elev.KlassemedlemskapResource;
+import no.novari.fint.model.resource.utdanning.elev.KlassemedlemskapResources;
+import no.novari.fint.model.utdanning.elev.ElevActions;
 
 @Slf4j
-@Api(tags = {"Medlemskap"})
+@Api(tags = {"Klassemedlemskap"})
 @CrossOrigin
 @RestController
-@RequestMapping(name = "Medlemskap", value = RestEndpoints.MEDLEMSKAP, produces = {FintRelationsMediaType.APPLICATION_HAL_JSON_VALUE, MediaType.APPLICATION_JSON_UTF8_VALUE})
-public class MedlemskapController {
+@RequestMapping(name = "Klassemedlemskap", value = RestEndpoints.KLASSEMEDLEMSKAP, produces = {FintRelationsMediaType.APPLICATION_HAL_JSON_VALUE, MediaType.APPLICATION_JSON_UTF8_VALUE})
+public class KlassemedlemskapController {
 
     private static final String ODATA_FILTER_QUERY_OPTION = "$filter=";
 
     @Autowired(required = false)
-    private MedlemskapCacheService cacheService;
+    private KlassemedlemskapCacheService cacheService;
 
     @Autowired
     private FintAuditService fintAuditService;
 
     @Autowired
-    private MedlemskapLinker linker;
+    private KlassemedlemskapLinker linker;
 
     @Autowired
     private ConsumerProps props;
@@ -86,7 +86,7 @@ public class MedlemskapController {
     @GetMapping("/last-updated")
     public Map<String, String> getLastUpdated(@RequestHeader(name = HeaderConstants.ORG_ID, required = false) String orgId) {
         if (cacheService == null) {
-            throw new CacheDisabledException("Medlemskap cache is disabled.");
+            throw new CacheDisabledException("Klassemedlemskap cache is disabled.");
         }
         if (props.isOverrideOrgId() || orgId == null) {
             orgId = props.getDefaultOrgId();
@@ -98,7 +98,7 @@ public class MedlemskapController {
     @GetMapping("/cache/size")
     public ImmutableMap<String, Integer> getCacheSize(@RequestHeader(name = HeaderConstants.ORG_ID, required = false) String orgId) {
         if (cacheService == null) {
-            throw new CacheDisabledException("Medlemskap cache is disabled.");
+            throw new CacheDisabledException("Klassemedlemskap cache is disabled.");
         }
         if (props.isOverrideOrgId() || orgId == null) {
             orgId = props.getDefaultOrgId();
@@ -107,7 +107,7 @@ public class MedlemskapController {
     }
 
     @GetMapping
-    public MedlemskapResources getMedlemskap(
+    public KlassemedlemskapResources getKlassemedlemskap(
             @RequestHeader(name = HeaderConstants.ORG_ID, required = false) String orgId,
             @RequestHeader(name = HeaderConstants.CLIENT, required = false) String client,
             @RequestParam(defaultValue = "0") long sinceTimeStamp,
@@ -117,9 +117,9 @@ public class MedlemskapController {
             HttpServletRequest request) throws InterruptedException {
         if (cacheService == null) {
             if (StringUtils.isNotBlank($filter)) {
-                return getMedlemskapByOdataFilter(client, orgId, $filter);
+                return getKlassemedlemskapByOdataFilter(client, orgId, $filter);
             }
-            throw new CacheDisabledException("Medlemskap cache is disabled.");
+            throw new CacheDisabledException("Klassemedlemskap cache is disabled.");
         }
         if (props.isOverrideOrgId() || orgId == null) {
             orgId = props.getDefaultOrgId();
@@ -129,7 +129,7 @@ public class MedlemskapController {
         }
         log.debug("OrgId: {}, Client: {}", orgId, client);
 
-        Event event = new Event(orgId, Constants.COMPONENT, ElevActions.GET_ALL_MEDLEMSKAP, client);
+        Event event = new Event(orgId, Constants.COMPONENT, ElevActions.GET_ALL_KLASSEMEDLEMSKAP, client);
         event.setOperation(Operation.READ);
         if (StringUtils.isNotBlank(request.getQueryString())) {
             event.setQuery("?" + request.getQueryString());
@@ -137,7 +137,7 @@ public class MedlemskapController {
         fintAuditService.audit(event);
         fintAuditService.audit(event, Status.CACHE);
 
-        Stream<MedlemskapResource> resources;
+        Stream<KlassemedlemskapResource> resources;
         if (size > 0 && offset >= 0 && sinceTimeStamp > 0) {
             resources = cacheService.streamSliceSince(orgId, sinceTimeStamp, offset, size);
         } else if (size > 0 && offset >= 0) {
@@ -154,7 +154,7 @@ public class MedlemskapController {
     }
     
     @PostMapping("/$query")
-    public MedlemskapResources getMedlemskapByQuery(
+    public KlassemedlemskapResources getKlassemedlemskapByQuery(
             @RequestHeader(name = HeaderConstants.ORG_ID, required = false)   String orgId,
             @RequestHeader(name = HeaderConstants.CLIENT, required = false) String client,
             @RequestParam(defaultValue = "0") long sinceTimeStamp,
@@ -163,10 +163,10 @@ public class MedlemskapController {
             @RequestBody(required = false) String query,
             HttpServletRequest request
     ) throws InterruptedException {
-        return getMedlemskap(orgId, client, sinceTimeStamp, size, offset, query, request);
+        return getKlassemedlemskap(orgId, client, sinceTimeStamp, size, offset, query, request);
     }
 
-    private MedlemskapResources getMedlemskapByOdataFilter(
+    private KlassemedlemskapResources getKlassemedlemskapByOdataFilter(
         String client, String orgId, String $filter
     ) throws InterruptedException {
         if (!fintFilterService.validate($filter))
@@ -177,7 +177,7 @@ public class MedlemskapController {
     
         Event event = new Event(
                 orgId, Constants.COMPONENT,
-                ElevActions.GET_MEDLEMSKAP, client);
+                ElevActions.GET_KLASSEMEDLEMSKAP, client);
         event.setOperation(Operation.READ);
         event.setQuery(ODATA_FILTER_QUERY_OPTION.concat($filter));
     
@@ -186,11 +186,11 @@ public class MedlemskapController {
     
         Event response = EventResponses.handle(queue.poll(5, TimeUnit.MINUTES));
         if (response.getData() == null || response.getData().isEmpty())
-            return new MedlemskapResources();
+            return new KlassemedlemskapResources();
     
-        ArrayList<MedlemskapResource> list = objectMapper.convertValue(
+        ArrayList<KlassemedlemskapResource> list = objectMapper.convertValue(
                 response.getData(),
-                new TypeReference<ArrayList<MedlemskapResource>>() {});
+                new TypeReference<ArrayList<KlassemedlemskapResource>>() {});
         fintAuditService.audit(response, Status.SENT_TO_CLIENT);
         list.forEach(r -> linker.mapAndResetLinks(r));
         return linker.toResources(list);
@@ -198,7 +198,7 @@ public class MedlemskapController {
 
 
     @GetMapping("/systemid/{id:.+}")
-    public MedlemskapResource getMedlemskapBySystemId(
+    public KlassemedlemskapResource getKlassemedlemskapBySystemId(
             @PathVariable String id,
             @RequestHeader(name = HeaderConstants.ORG_ID, required = false) String orgId,
             @RequestHeader(name = HeaderConstants.CLIENT, required = false) String client) throws InterruptedException {
@@ -210,7 +210,7 @@ public class MedlemskapController {
         }
         log.debug("systemId: {}, OrgId: {}, Client: {}", id, orgId, client);
 
-        Event event = new Event(orgId, Constants.COMPONENT, ElevActions.GET_MEDLEMSKAP, client);
+        Event event = new Event(orgId, Constants.COMPONENT, ElevActions.GET_KLASSEMEDLEMSKAP, client);
         event.setOperation(Operation.READ);
         event.setQuery("systemId/" + id);
 
@@ -218,11 +218,11 @@ public class MedlemskapController {
             fintAuditService.audit(event);
             fintAuditService.audit(event, Status.CACHE);
 
-            Optional<MedlemskapResource> medlemskap = cacheService.getMedlemskapBySystemId(orgId, id);
+            Optional<KlassemedlemskapResource> klassemedlemskap = cacheService.getKlassemedlemskapBySystemId(orgId, id);
 
             fintAuditService.audit(event, Status.CACHE_RESPONSE, Status.SENT_TO_CLIENT);
 
-            return medlemskap.map(linker::toResource).orElseThrow(() -> new EntityNotFoundException(id));
+            return klassemedlemskap.map(linker::toResource).orElseThrow(() -> new EntityNotFoundException(id));
 
         } else {
             BlockingQueue<Event> queue = synchronousEvents.register(event);
@@ -233,11 +233,11 @@ public class MedlemskapController {
             if (response.getData() == null ||
                     response.getData().isEmpty()) throw new EntityNotFoundException(id);
 
-            MedlemskapResource medlemskap = objectMapper.convertValue(response.getData().get(0), MedlemskapResource.class);
+            KlassemedlemskapResource klassemedlemskap = objectMapper.convertValue(response.getData().get(0), KlassemedlemskapResource.class);
 
             fintAuditService.audit(response, Status.SENT_TO_CLIENT);
 
-            return linker.mapAndResetLinks(medlemskap);
+            return linker.mapAndResetLinks(klassemedlemskap);
         }    
     }
 
