@@ -63,9 +63,9 @@ public class LinkMapper {
             .put("no.novari.fint.model.utdanning.ot.OtUngdom", "/utdanning/ot/otungdom")
             .put("no.novari.fint.model.utdanning.vurdering.Sensor", "/utdanning/vurdering/sensor")
             .put("no.novari.fint.model.administrasjon.personal.Arbeidsforhold", "/administrasjon/personal/arbeidsforhold")
+            .put("no.novari.fint.model.utdanning.timeplan.Time", "/utdanning/timeplan/time")
             .put("no.novari.fint.model.utdanning.timeplan.Undervisningsgruppe", "/utdanning/timeplan/undervisningsgruppe")
             .put("no.novari.fint.model.utdanning.vurdering.Eksamensgruppe", "/utdanning/vurdering/eksamensgruppe")
-            .put("no.novari.fint.model.utdanning.timeplan.Time", "/utdanning/timeplan/time")
             .put("no.novari.fint.model.utdanning.kodeverk.Varseltype", "/utdanning/kodeverk/varseltype")
             /* .put(TODO,TODO) */
             .build();
